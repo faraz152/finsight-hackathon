@@ -1,4 +1,7 @@
-# Phase 3 hand-off: UI & screens (for building with AI help)
+# Phase 3 hand-off
+
+> Status 7 Nov: Afza did T1. T1b–T6 were finished by the lead's agents (collaborator had no Java on her laptop), reviewed, merged into main and checked on the phone. T7 (icons) remains optional.
+: UI & screens (for building with AI help)
 
 Hi! This phase is about the **screens**. The hard parts (pipeline, Coach logic, privacy, design system) are done.
 You will mostly ask Claude Code to build screens, and a test will tell you if anything breaks the InvesTerra design.
@@ -30,24 +33,24 @@ Full rules + component table: `.claude/skills/finsight-design-system/SKILL.md`.
 ## 4. Tasks (in order). Each has a ready prompt.
 
 - [x] **T1 · Goals screen** — done by Afza, reviewed + merged (review fix: list now refreshes when transactions change)
-- [ ] **T1b · Back gesture closes Goals** (review follow-up)
+- [x] **T1b · Back gesture closes Goals** (review follow-up)
   > Use the finsight-design-system skill. When Goals & bills is open, the Android back gesture should close Goals instead of leaving the app. Add an expect/actual `PlatformBackHandler(enabled, onBack)` (androidMain: androidx.activity.compose.BackHandler) and use it in App.kt while goalsOpen. Also show no tab as selected while Goals is open. Run the unit tests.
 - [ ] ~~T1 · Goals screen~~ (original prompt kept below for reference) — plan 6.1/6.7
   > Use the finsight-design-system skill. Add a Goals screen in a new file ui/screens/GoalsScreen.kt, opened from a new QuickAction "Goals & bills" in the centre hexagon menu in App.kt (the bottom bar keeps 4 tabs + hexagon). Show: recurring payments from state.tools.recurringPayments() as cards with name, amount (AmountText) and "around day N"; a "What If?" card with an FsTextField for a price and an FsButton "Check" that shows WhatIf.afford(state.tools, priceMinor) verdict and lines. Use only design-system components. Run the unit tests.
 
-- [ ] **T2 · Health detail sheet** — plan 6.5
+- [x] **T2 · Health detail sheet** — plan 6.5
   > Use the finsight-design-system skill. When the Financial health MetricTile on Home is tapped, open a ModalBottomSheet (not go to Coach) showing HealthScore.compute(...) : score with band colour, a profile FsChip row to switch state.profile, then each check as a KeyValueRow-style row with its detail and an FsTag "unknown" when score is null, then "Next steps" list. Run the unit tests.
 
-- [ ] **T3 · Onboarding with prominent disclosure** — plan 6.4 (Google Play requirement)
+- [x] **T3 · Onboarding with prominent disclosure** — plan 6.4 (Google Play requirement)
   > Use the finsight-design-system skill. Add ui/screens/OnboardingScreen.kt shown on first launch (keep a Boolean in AppState, in memory is fine). 3 steps with FsCard: what FinSight reads (notifications from SMS + allowed wallet apps only, never the SMS inbox), what never leaves the phone, cloud AI is optional. Final FsButton "Allow notification access" calls state.openNotificationSettings(); FsButton Text variant "Try with demo data" imports demo SMS and closes onboarding. Run the unit tests.
 
-- [ ] **T4 · Transactions polish**
+- [x] **T4 · Transactions polish**
   > Use the finsight-design-system skill. In TransactionsScreen group rows by day with a caption header ("Today", "Yesterday", date), add FsChip filters for All / Review / Income / Transfers / Refunds, and an EmptyState per filter. Run the unit tests.
 
-- [ ] **T5 · Pulse list on Coach**
+- [x] **T5 · Pulse list on Coach**
   > Use the finsight-design-system skill. At the top of CoachScreen show a horizontally scrolling row of Pulse cards (Pulse.cards(state.tools)) as FsCard(tone = NoticeTone.Info) with title, body, "Why:" caption and a Text-variant FsButton "Dismiss" that hides the card (remember a set of dismissed titles). Run the unit tests.
 
-- [ ] **T6 · Accuracy card (evaluation for judges)** — plan 6.8
+- [x] **T6 · Accuracy card (evaluation for judges)** — plan 6.8
   > Use the finsight-design-system skill. In PrivacyScreen add an FsCard "How accurate is FinSight?" showing: templates tested 59, amount correct 59/59, direction correct 59/59, transactions sent for review = count of needsReview / total from state.repo.transactions. Use KeyValueRow. Run the unit tests.
 
 - [ ] **T7 · Icons instead of glyphs (stretch)**
