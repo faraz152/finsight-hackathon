@@ -33,7 +33,7 @@ fun App(state: AppState) {
         )
 
         Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas)) {
-            Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(bottom = Sizes.navBarHeight + Edges.outline)) {
+            Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding().padding(bottom = Sizes.navBarHeight + Edges.outline + Sizes.hexagonRaise)) {
                 when (tab) {
                     Tab.HOME -> HomeScreen(state) { tab = it }
                     Tab.TXNS -> TransactionsScreen(state)

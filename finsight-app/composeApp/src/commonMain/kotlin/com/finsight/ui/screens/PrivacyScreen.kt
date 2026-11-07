@@ -28,7 +28,7 @@ fun PrivacyScreen(state: AppState) {
                 style = type.text.bodyMedium, color = FsColors.role.content.secondary)
             Spacer(Modifier.height(Spacing.s3))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                FsTag(if (access) "Notification access: ON" else "Notification access: OFF", if (access) TagTone.Success else TagTone.Warning, Modifier.weight(1f, fill = false))
+                FsTag(if (access) "Capture: ON" else "Capture: OFF", if (access) TagTone.Success else TagTone.Warning)
                 Spacer(Modifier.weight(1f))
                 FsButton(if (access) "Manage" else "Enable", { state.openNotificationSettings() }, small = true)
             }
