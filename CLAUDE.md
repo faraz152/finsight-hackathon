@@ -7,7 +7,8 @@ Privacy-first AI financial companion. Android-first Kotlin Multiplatform app. **
   - `commonMain/.../domain` models (Money = Long minor units + currency, never Double)
   - `commonMain/.../pipeline` Gate → RegexExtractor → Integrity → RuleCategorizer → Scorer → Pipeline (+ merchant memory)
   - `commonMain/.../coach` Tools, HealthScore, Pulse, WhatIf, PrivacyRouter/Redactor/SanitizedPrompt, CoachAgent
-  - `commonMain/.../data` in-memory repository (StateFlow); `ui/` Compose screens
+  - `commonMain/.../data` in-memory repository (StateFlow)
+  - `commonMain/.../ui/designsystem` InvesTerra tokens + components (Tokens.kt, Theme.kt, Components.kt); `ui/screens` one file per screen; `ui/App.kt` navigation
   - `androidMain/.../android` MainActivity, NotificationCaptureService, DemoReplay, GeminiCloudLlm (only network code)
 - `HACKATHON_KMP_PROTOTYPE.md` — the full plan (product, architecture, scope). Source of truth for *what*.
 - `.plan/` — phases, tasks, checklists. Source of truth for *what's next*. Tick boxes as you go.
@@ -29,6 +30,7 @@ Use the `finsight-build-run` skill for install/run/notification-test details.
 - **Rules first, LLM second.** The pipeline must work rules-only (no model on phone yet). `LocalLlm` is optional (`NoLocalLlm`).
 - **Money:** `Long` paisa + ISO code. Format with `formatPkr`.
 - **Keep it minimal:** no new libraries unless a task needs them (no SQLDelight/Koin/Ktor today). Persistence is in-memory + demo replay.
+- **Design:** every UI change follows the `finsight-design-system` skill (InvesTerra Indigo Night tokens, Manrope, creem edges, no shadows). `DesignTokenGuardTest` fails on raw colours/dp/sp in `ui/screens`.
 - Gemini key lives in `finsight-app/local.properties` (`GEMINI_API_KEY=`); never commit it. Missing key → Coach falls back to on-device answers.
 
 ## Versions (pinned, known to build on this machine)
@@ -37,4 +39,5 @@ Kotlin 2.0.21 · Compose Multiplatform 1.7.1 · AGP 8.7.3 · Gradle 8.14 · comp
 ## Skills
 - `finsight-build-run` — build, install, run, post test notifications, troubleshoot Gradle.
 - `finsight-pipeline` — add/fix SMS parsing rules, categories, integrity checks; test against `sms_test_templates.json`.
+- `finsight-design-system` — any screen/UI work: tokens, components, layout recipe.
 - `finsight-coach` — add Coach tools/intents, Health/Pulse/What-If, privacy router rules.

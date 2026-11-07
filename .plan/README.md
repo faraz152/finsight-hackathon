@@ -10,6 +10,11 @@ Tick `[x]` as tasks land. Order matters: each phase ends with a **working, demoa
 | [P3 Coach](phase-3-coach.md) | 1:15–1:40 | Chat (local + Gemini hybrid), Health 2.0, Pulse, What If, Privacy Center | Health + "what was shared" demo works |
 | [P4 Demo ready](phase-4-demo.md) | 1:40–2:00 | Polish, release APK, rehearse, backup video | Demo script runs twice |
 
+## Git branches
+`main` has everything merged. History is one commit per phase (Phase 0 → 3 + design system), and the stacked branches `phase-1-pipeline`, `phase-2-coach`, `phase-3-app` remain for reference. New work: branch `phase-3/<task>` from `main`, PR back to `main`.
+
+**Phase 3 hand-off (UI with AI help): [phase-3-handoff.md](phase-3-handoff.md).**
+
 Owners (adjust on site): A = KMP/data, B = UI, C = Coach/AI, D = Pipeline/tests.
 
 Out of scope today (say "roadmap"): LiteRT-LM Gemma on device, SQLDelight persistence, SQLCipher, PDF export, committee/Zakat modules, iOS.
