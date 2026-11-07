@@ -11,14 +11,18 @@ object Integrity {
     private val pending = Regex("""(pending|on hold|authori[sz]ation hold|is being processed)""", RegexOption.IGNORE_CASE)
     private val fee = Regex("""(service charges?|annual fee|sms charges|excise duty|withholding tax|wht\b|late payment charge)""", RegexOption.IGNORE_CASE)
     private val transferOut = Regex("""(sent to|transferred to|funds transfer|ibft|raast|to .*account|to .*a/c|wallet to)""", RegexOption.IGNORE_CASE)
-    private val transferIn = Regex("""(received from|transfer(red)? from|ibft from|raast from)""", RegexOption.IGNORE_CASE)
+    private val transferIn = Regex("""(received from|transfer(red)? from|ibft from|raast from|via (raast|ibft)|received via)""", RegexOption.IGNORE_CASE)
     private val salary = Regex("""(salary|payroll)""", RegexOption.IGNORE_CASE)
 
     data class Classification(val kind: TxnKind, val status: TxnStatus, val reasons: List<String>)
 
     fun classify(text: String, type: TxnType, ownAccounts: Set<String>, counterpartyLast4: String?): Classification {
         val r = mutableListOf<String>()
-        val status = if (pending.containsMatchIn(text)) TxnStatus.PENDING.also { r += "Marked pending (\"${pending.find(text)!!.value}\")" } else TxnStatus.POSTED
+        val status = when {
+            reversal.containsMatchIn(text) -> TxnStatus.REVERSED
+            pending.containsMatchIn(text) -> TxnStatus.PENDING.also { r += "Marked pending (\"${pending.find(text)!!.value}\")" }
+            else -> TxnStatus.POSTED
+        }
         val kind = when {
             reversal.containsMatchIn(text) -> TxnKind.REVERSAL.also { r += "Reversal wording: excluded from spend and income" }
             refund.containsMatchIn(text) && type == TxnType.CREDIT -> TxnKind.REFUND.also { r += "Refund: not counted as income" }
@@ -26,7 +30,7 @@ object Integrity {
             type == TxnType.DEBIT && counterpartyLast4 != null && counterpartyLast4 in ownAccounts ->
                 TxnKind.TRANSFER_OUT.also { r += "Transfer to your own account ••$counterpartyLast4" }
             type == TxnType.CREDIT && salary.containsMatchIn(text) -> TxnKind.INCOME.also { r += "Salary credit" }
-            type == TxnType.CREDIT && transferIn.containsMatchIn(text) -> TxnKind.INCOME.also { r += "Incoming transfer counted as income" }
+            type == TxnType.CREDIT && transferIn.containsMatchIn(text) -> TxnKind.INCOME.also { r += "Incoming transfer (Raast / IBFT / wallet) counted as income" }
             type == TxnType.DEBIT && transferOut.containsMatchIn(text) -> TxnKind.TRANSFER_OUT.also { r += "Outgoing transfer" }
             type == TxnType.CREDIT -> TxnKind.INCOME
             else -> TxnKind.EXPENSE
