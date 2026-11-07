@@ -63,6 +63,8 @@ fun EdgeSurface(
             .background(edgeColor)
             .then(if (onClick != null) Modifier.clickable(interaction, indication = null, enabled = enabled, onClick = onClick) else Modifier)
             .padding(start = Edges.outline, end = Edges.outline, top = Edges.outline + travel, bottom = edge.bottom - travel),
+        // The face always fills the footprint (fixed/weighted sizes), but still wraps for chips and tags.
+        propagateMinConstraints = true,
     ) {
         Column(Modifier.clip(shape).background(fill).padding(contentPadding), content = content)
     }

@@ -12,6 +12,6 @@ Skill: `finsight-build-run`.
 - [x] `DemoReplay` loads assets JSON → pipeline (shows "N by rules, M review, K dropped")
 - [x] `NotificationCaptureService` — SMS app allowlist + JazzCash/Easypaisa + shell (debug) → pipeline
 - [x] Onboarding / Privacy: prominent disclosure + button to notification access settings
-- [ ] Installed and tested on device: replay + live `adb shell cmd notification post`
+- [x] Installed and tested on device (Xiaomi redwood): replay + live notification → KFC Gulberg, Food, 95% green
 
 **Exit:** live notification appears categorized in seconds.

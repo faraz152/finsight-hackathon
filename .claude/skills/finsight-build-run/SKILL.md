@@ -20,6 +20,9 @@ APK: `finsight-app/composeApp/build/outputs/apk/debug/composeApp-debug.apk`.
 
 No phone? Start an emulator: `~/Library/Android/sdk/emulator/emulator -list-avds`, then `emulator -avd <name> &`.
 
+## Xiaomi / MIUI
+`INSTALL_FAILED_USER_RESTRICTED` → Developer options: enable "Install via USB" and "USB debugging (Security settings)", keep phone unlocked, tap Install on the prompt.
+
 ## Grant notification access (needed for live capture)
 In app: Privacy tab → "Enable notification access", or:
 ```bash
@@ -29,7 +32,8 @@ $ADB shell cmd notification allow_listener com.finsight.app/com.finsight.android
 ## Post a fake bank notification (live-capture demo)
 The listener accepts SMS apps + `com.android.shell` in debug builds.
 ```bash
-$ADB shell cmd notification post -S bigtext -t "8558" fs1 "Rs 1,250.00 sent to KFC Gulberg via JazzCash. Fee: Rs 0.00. Balance: Rs 8,750.00. TID: 033050058799."
+# Quote the WHOLE command for the remote shell, or the text is split into words ("No amount").
+$ADB shell "cmd notification post -S bigtext -t 8558 fs1 'Rs 1,250.00 sent to KFC Gulberg via JazzCash. Fee: Rs 0.00. Balance: Rs 8,750.00. TID: 033050058799.'"
 ```
 Verify syntax on the device with `$ADB shell cmd notification help` if it fails.
 
