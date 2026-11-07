@@ -14,7 +14,11 @@ val localProps = Properties().apply {
 
 kotlin {
     androidTarget {
-        compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11) }
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+            // LiteRT-LM is compiled with Kotlin 2.2 (metadata 2.2.0); we are pinned to Kotlin 2.0.21.
+            freeCompilerArgs.add("-Xskip-metadata-version-check")
+        }
     }
     sourceSets {
         commonMain.dependencies {
@@ -28,6 +32,8 @@ kotlin {
         androidMain.dependencies {
             implementation("androidx.activity:activity-compose:1.9.3")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+            // On-device Gemma. 0.8.0 = newest release without a kotlin-reflect 2.2 dependency; model is adb-pushed, not bundled.
+            implementation("com.google.ai.edge.litertlm:litertlm-android:0.8.0")
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

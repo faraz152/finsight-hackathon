@@ -40,6 +40,27 @@ Verify syntax on the device with `$ADB shell cmd notification help` if it fails.
 ## Demo replay
 Home → "Import demo SMS" replays `assets/sms_test_templates.json` (58 messages) through the pipeline.
 
+## On-device Gemma (optional, LiteRT-LM)
+Library: `com.google.ai.edge.litertlm:litertlm-android:0.8.0` (CPU backend). The model is never in the APK; no file → app runs rules-only, nothing breaks.
+
+1. On huggingface.co, log in and accept the Gemma licence at https://huggingface.co/litert-community/Gemma3-1B-IT (gated).
+2. Download **`gemma3-1b-it-int4.litertlm`** (~584 MB, generic CPU/GPU build; NOT the `_sm8xxx`/`_mt69xx`/`Tensor` NPU builds, NOT `.task`):
+   ```bash
+   # needs a HF token with read access: huggingface-cli login, or export HF_TOKEN=hf_...
+   curl -L -H "Authorization: Bearer $HF_TOKEN" -o ~/Downloads/gemma3-1b-it-int4.litertlm \
+     https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/gemma3-1b-it-int4.litertlm
+   ```
+3. Install the app once (creates the app's external files dir), then push under the fixed name `model.litertlm`:
+   ```bash
+   ./gradlew :composeApp:installDebug
+   $ADB shell mkdir -p /sdcard/Android/data/com.finsight.app/files
+   $ADB push ~/Downloads/gemma3-1b-it-int4.litertlm /sdcard/Android/data/com.finsight.app/files/model.litertlm
+   $ADB shell am force-stop com.finsight.app && $ADB shell am start -n com.finsight.app/com.finsight.android.MainActivity
+   ```
+   Use `installDebug` / `adb install -r` afterwards; **uninstalling deletes the model**.
+4. Verify: `$ADB logcat -s LiteRtLlm` → `Gemma loaded from model.litertlm in N ms`, then `Gemma <ms> → food` per reviewed transaction. Import demo SMS: uncertain rows (yellow/red) get a "Gemma: x; rule: y → …" line in their explanation and source HYBRID/LLM. `LiteRT-LM load failed` → wrong file/format; the app stays rules-only.
+5. Too slow (> ~3 s per call)? It runs in the background one transaction at a time, so the UI is unaffected; the demo still works rules-first.
+
 ## Gemini (optional, for Coach HYBRID/CLOUD)
 `finsight-app/local.properties`: `GEMINI_API_KEY=...` and optional `GEMINI_MODEL=gemini-flash-latest`. Rebuild. No key → on-device answers only (badge "On-device").
 

@@ -10,12 +10,23 @@ import android.provider.Settings
 import com.finsight.BuildConfig
 import com.finsight.domain.Channel
 import com.finsight.domain.RawInput
+import com.finsight.pipeline.GemmaReviewer
 import com.finsight.ui.AppState
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 class FinSightApp : Application() {
     lateinit var state: AppState
         private set
+    lateinit var localLlm: LiteRtLlm
+        private set
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, t ->
+        android.util.Log.w("FinSightApp", "background task failed", t)
+    })
 
     override fun onCreate() {
         super.onCreate()
@@ -31,6 +42,16 @@ class FinSightApp : Application() {
             loadDemo = ::loadDemo,
             store = FileStore(this),
         )
+        startGemma()
+    }
+
+    /** On-device Gemma second opinion for uncertain transactions. No model file → nothing happens (rules-only). */
+    private fun startGemma() {
+        localLlm = LiteRtLlm(this)
+        if (!localLlm.modelFile.exists()) return
+        appScope.launch {
+            if (localLlm.warmUp()) GemmaReviewer(state.repo, localLlm).start(this)
+        }
     }
 
     private fun isOnline(): Boolean {
