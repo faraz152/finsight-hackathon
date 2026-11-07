@@ -18,6 +18,7 @@ fun App(state: AppState) {
         var tab by remember { mutableStateOf(Tab.HOME) }
         var actionsOpen by remember { mutableStateOf(false) }
         var quickAddOpen by remember { mutableStateOf(false) }
+        var goalsOpen by remember { mutableStateOf(false) }
 
         // FinSight functionality behind the InvesTerra hexagon.
         val actions = listOf(
@@ -25,6 +26,9 @@ fun App(state: AppState) {
             QuickAction("Ask Coach", "Chat in English or Roman Urdu", "✦", QuickActionTone.Brand) { actionsOpen = false; tab = Tab.COACH },
             QuickAction("Can I afford it?", "What If? simulator", "?", QuickActionTone.Warning) {
                 actionsOpen = false; state.coachDraft.value = "Can I afford PKR "; tab = Tab.COACH
+            },
+            QuickAction("Goals & bills", "Recurring payments and What If?", "◎", QuickActionTone.Info) {
+                actionsOpen = false; goalsOpen = true
             },
             QuickAction("Import messages", "Replay bank & wallet SMS", "↓", QuickActionTone.Info) {
                 actionsOpen = false; state.repo.importBatch(state.loadDemo()); tab = Tab.TXNS
@@ -34,7 +38,8 @@ fun App(state: AppState) {
 
         Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas)) {
             Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding().padding(bottom = Sizes.navBarHeight + Edges.outline + Sizes.hexagonRaise)) {
-                when (tab) {
+                if (goalsOpen) GoalsScreen(state) { goalsOpen = false }
+                else when (tab) {
                     Tab.HOME -> HomeScreen(state) { tab = it }
                     Tab.TXNS -> TransactionsScreen(state)
                     Tab.COACH -> CoachScreen(state)
