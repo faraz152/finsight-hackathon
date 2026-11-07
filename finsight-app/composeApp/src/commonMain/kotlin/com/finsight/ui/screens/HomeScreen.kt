@@ -27,6 +27,7 @@ fun HomeScreen(state: AppState, go: (Tab) -> Unit) {
     val pulse = remember(txns) { Pulse.cards(state.tools) }
     var quick by remember { mutableStateOf("") }
     var quickMsg by remember { mutableStateOf<String?>(null) }
+    var healthOpen by remember { mutableStateOf(false) }
     val type = FsTheme.type
 
     fun addQuick() {
@@ -52,8 +53,7 @@ fun HomeScreen(state: AppState, go: (Tab) -> Unit) {
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s3)) {
-            val hColor = when { health.score == null -> FsColors.role.content.secondary; health.score >= 80 -> FsColors.role.change.upContent; health.score >= 60 -> FsColors.role.status.warningContent; else -> FsColors.role.status.errorContent }
-            MetricTile("Financial health", health.score?.let { "$it/100" } ?: "—", "${health.band} · ${health.used}/6 checks", hColor, Modifier.weight(1f)) { go(Tab.COACH) }
+            MetricTile("Financial health", health.score?.let { "$it/100" } ?: "—", "${health.band} · ${health.used}/6 checks", healthBandColor(health.score), Modifier.weight(1f)) { healthOpen = true }
             MetricTile("Data coverage", coverage.percent?.let { "$it%" } ?: "—", if ((coverage.percent ?: 0) < 100) "Partial data" else "Complete", FsColors.role.status.infoContent, Modifier.weight(1f))
         }
         if (txns.isNotEmpty()) Text(coverage.basis, style = type.text.caption, color = FsColors.role.content.tertiary)
@@ -97,4 +97,5 @@ fun HomeScreen(state: AppState, go: (Tab) -> Unit) {
         }
         Spacer(Modifier.height(Spacing.s6))
     }
+    if (healthOpen) HealthSheet(health, profile, onProfile = { state.profile.value = it }, onClose = { healthOpen = false })
 }
