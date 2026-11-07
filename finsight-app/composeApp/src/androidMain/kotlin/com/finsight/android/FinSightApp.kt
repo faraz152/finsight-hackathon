@@ -32,7 +32,7 @@ class FinSightApp : Application() {
         super.onCreate()
         instance = this
         state = AppState(
-            cloud = GeminiCloudLlm(BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL),
+            cloud = GeminiCloudLlm(BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL, BuildConfig.OPENROUTER_API_KEY, BuildConfig.OPENROUTER_MODEL),
             isOnline = ::isOnline,
             now = { System.currentTimeMillis() },
             openNotificationSettings = {

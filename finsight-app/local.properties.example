@@ -2,3 +2,6 @@ sdk.dir=/Users/<you>/Library/Android/sdk
 # Optional: enables Coach HYBRID/CLOUD routes. Never commit the real key.
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.8-flash
+# Optional fallback: Gemini via OpenRouter (used only if the Google key fails). Never commit.
+OPENROUTER_API_KEY=
+OPENROUTER_MODEL=google/gemini-3.8-flash
