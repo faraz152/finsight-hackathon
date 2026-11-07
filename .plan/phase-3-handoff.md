@@ -14,7 +14,14 @@ You will mostly ask Claude Code to build screens, and a test will tell you if an
 Open a terminal in the repo root and run `claude`. It reads `CLAUDE.md` and the skills automatically.
 Always start a task with: **"Use the finsight-design-system skill."**
 After every task run: `cd finsight-app && ./gradlew :composeApp:testDebugUnitTest` → must say BUILD SUCCESSFUL.
-Commit small: one task = one commit = one push to a branch `phase-3/<task>`; open a PR to `main`.
+**Work only on the branch `phase-3-ui`** (never `main`, never the old `phase-3-app`):
+```bash
+git checkout phase-3-ui && git pull
+# ... do one task with Claude, run the tests ...
+git add -A && git commit -m "T1: Goals screen" && git push
+```
+One task = one commit, push after each task. Faraz merges `phase-3-ui` into `main` at checkpoints.
+Before starting each new task, get Faraz's latest changes: `git pull origin main`.
 
 ## 3. Rules you never have to remember (the test checks them)
 No raw colours / dp / sp, no shadows or gradients, money always via `AmountText` / `FsTheme.type.numeric`.

@@ -11,7 +11,7 @@ Tick `[x]` as tasks land. Order matters: each phase ends with a **working, demoa
 | [P4 Demo ready](phase-4-demo.md) | 1:40–2:00 | Polish, release APK, rehearse, backup video | Demo script runs twice |
 
 ## Git branches
-`main` has everything merged. History is one commit per phase (Phase 0 → 3 + design system), and the stacked branches `phase-1-pipeline`, `phase-2-coach`, `phase-3-app` remain for reference. New work: branch `phase-3/<task>` from `main`, PR back to `main`.
+`main` has everything merged. History is one commit per phase (Phase 0 → 3 + design system), and the stacked branches `phase-1-pipeline`, `phase-2-coach`, `phase-3-app` remain for reference. Phase 3 UI work happens on **`phase-3-ui`** (collaborator), merged into `main` at checkpoints. Other new work: short branches from `main`.
 
 **Phase 3 hand-off (UI with AI help): [phase-3-handoff.md](phase-3-handoff.md).**
 
