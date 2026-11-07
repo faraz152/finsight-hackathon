@@ -29,7 +29,10 @@ Full rules + component table: `.claude/skills/finsight-design-system/SKILL.md`.
 
 ## 4. Tasks (in order). Each has a ready prompt.
 
-- [ ] **T1 · Goals screen** — plan 6.1/6.7
+- [x] **T1 · Goals screen** — done by Afza, reviewed + merged (review fix: list now refreshes when transactions change)
+- [ ] **T1b · Back gesture closes Goals** (review follow-up)
+  > Use the finsight-design-system skill. When Goals & bills is open, the Android back gesture should close Goals instead of leaving the app. Add an expect/actual `PlatformBackHandler(enabled, onBack)` (androidMain: androidx.activity.compose.BackHandler) and use it in App.kt while goalsOpen. Also show no tab as selected while Goals is open. Run the unit tests.
+- [ ] ~~T1 · Goals screen~~ (original prompt kept below for reference) — plan 6.1/6.7
   > Use the finsight-design-system skill. Add a Goals screen in a new file ui/screens/GoalsScreen.kt, opened from a new QuickAction "Goals & bills" in the centre hexagon menu in App.kt (the bottom bar keeps 4 tabs + hexagon). Show: recurring payments from state.tools.recurringPayments() as cards with name, amount (AmountText) and "around day N"; a "What If?" card with an FsTextField for a price and an FsButton "Check" that shows WhatIf.afford(state.tools, priceMinor) verdict and lines. Use only design-system components. Run the unit tests.
 
 - [ ] **T2 · Health detail sheet** — plan 6.5
