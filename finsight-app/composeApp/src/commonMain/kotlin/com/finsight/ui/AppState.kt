@@ -19,6 +19,12 @@ class AppState(
     val hasNotificationAccess: () -> Boolean,
     val loadDemo: () -> List<RawInput>,
     val store: KeyValueStore? = null,
+    /** Test Lab (Privacy screen): ask for POST_NOTIFICATIONS (Android 13+). No-op off-device / in tests. */
+    val requestPostNotifications: () -> Unit = {},
+    /** Test Lab: post one real bank-style notification for a [com.finsight.data.TestSamples] id. */
+    val sendTestNotification: (String) -> Unit = {},
+    /** Test Lab: post every sample, 1.5 s apart. */
+    val sendTestBurst: () -> Unit = {},
 ) {
     val repo = Repository(store)
     val tools = Tools({ repo.transactions.value }, now)

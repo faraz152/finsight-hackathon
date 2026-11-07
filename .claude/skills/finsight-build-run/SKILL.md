@@ -37,6 +37,20 @@ $ADB shell "cmd notification post -S bigtext -t 8558 fs1 'Rs 1,250.00 sent to KF
 ```
 Verify syntax on the device with `$ADB shell cmd notification help` if it fails.
 
+## Test Lab (end-to-end capture test, no laptop needed)
+Privacy tab → **Test Lab** card (top). It posts REAL notifications from FinSight on channel `finsight_test_bank` ("Test bank alerts"); `NotificationCaptureService` accepts our own package ONLY on that channel, so they go NotificationManager → listener → `Repository.ingest` like a real bank alert.
+- Needs notification access ON (card warns + "Enable" button) and, on Android 13+, `POST_NOTIFICATIONS` (asked on the first Test Lab tap).
+- Chip = one sample; "Send all samples" = burst, 1.5 s apart. "Last captured" shows the newest 5 notification transactions (merchant, amount, category, `notification`, `merged 2x` for the duplicate pair) + scam flags. OTP is dropped, so it shows nothing.
+- Samples (sender, `{TID}` template, expected outcome): `commonMain/.../data/TestSamples.kt`; every send gets a fresh 12-digit TID (fingerprint `ref:<TID>`), the duplicate pair reuses one TID → merged. `TestSamplesTest` runs all of them through `Repository.ingest`.
+- Code: `androidMain/.../android/TestNotifier.kt` (channel + `send` / `sendBurst`), wired via `AppState.sendTestNotification/sendTestBurst/requestPostNotifications` in `FinSightApp.kt` + `MainActivity.kt`.
+- Logs: `$ADB logcat -s FinSight` → `captured from com.finsight.app → Accepted(...)`.
+
+From the laptop instead (posts as `com.android.shell`, debug builds only):
+```bash
+scripts/send_test_sms.sh 10 1.5      # 10 random samples, 1.5 s apart, fresh TIDs; ADB=... to override adb path
+```
+Keep its `SAMPLES` in sync with `TestSamples.kt` (`TestSamplesTest` checks it).
+
 ## Demo replay
 Home → "Import demo SMS" replays `assets/sms_test_templates.json` (58 messages) through the pipeline.
 

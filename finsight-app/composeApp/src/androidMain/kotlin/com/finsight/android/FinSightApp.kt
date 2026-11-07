@@ -7,7 +7,9 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.provider.Settings
+import android.widget.Toast
 import com.finsight.BuildConfig
+import com.finsight.data.TestSamples
 import com.finsight.domain.Channel
 import com.finsight.domain.RawInput
 import com.finsight.pipeline.GemmaReviewer
@@ -24,6 +26,10 @@ class FinSightApp : Application() {
         private set
     lateinit var localLlm: LiteRtLlm
         private set
+    lateinit var testNotifier: TestNotifier
+        private set
+    /** Set by the visible MainActivity: asks for POST_NOTIFICATIONS, then runs the action if granted. */
+    @Volatile var postPermissionRequester: ((onGranted: () -> Unit) -> Unit)? = null
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, t ->
         android.util.Log.w("FinSightApp", "background task failed", t)
     })
@@ -31,6 +37,7 @@ class FinSightApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        testNotifier = TestNotifier(this)
         state = AppState(
             cloud = GeminiCloudLlm(BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL, BuildConfig.OPENROUTER_API_KEY, BuildConfig.OPENROUTER_MODEL),
             isOnline = ::isOnline,
@@ -41,6 +48,9 @@ class FinSightApp : Application() {
             hasNotificationAccess = ::hasNotificationAccess,
             loadDemo = ::loadDemo,
             store = FileStore(this),
+            requestPostNotifications = { withPostPermission {} },
+            sendTestNotification = { id -> withPostPermission { TestSamples.byId(id)?.let { testNotifier.send(it) } } },
+            sendTestBurst = { withPostPermission { appScope.launch { testNotifier.sendBurst(TestSamples.all) } } },
         )
         startGemma()
     }
@@ -52,6 +62,14 @@ class FinSightApp : Application() {
         appScope.launch {
             if (localLlm.warmUp()) GemmaReviewer(state.repo, localLlm).start(this)
         }
+    }
+
+    /** Test Lab: run [action] now if we may post notifications, else ask once (Android 13+) and run it on grant. */
+    private fun withPostPermission(action: () -> Unit) {
+        if (testNotifier.canPost()) return action()
+        val requester = postPermissionRequester
+        if (requester != null && android.os.Build.VERSION.SDK_INT >= 33) requester(action)
+        else Toast.makeText(this, "Notifications are off for FinSight. Turn them on in system settings to use Test Lab.", Toast.LENGTH_LONG).show()
     }
 
     private fun isOnline(): Boolean = runCatching {
