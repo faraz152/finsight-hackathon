@@ -59,6 +59,8 @@ object RegexExtractor {
     private fun cleanName(raw: String, allowWallet: Boolean = false): String? {
         var words = raw.trim().trimEnd('.', '*', ',').split(Regex("""\s+""")).filter { it.isNotBlank() }
         while (words.isNotEmpty() && words.first().lowercase() in stopMerchant + setOf("your", "paid", "the", "my")) words = words.drop(1)
+        // "SAJID committee via Raast from A/C" -> "SAJID committee": a name ends at a connector word.
+        words = words.takeWhile { it.lowercase() !in setOf("via", "from", "using", "through", "thru", "with", "on") }
         val name = words.joinToString(" ")
         return name.takeIf { it.length >= 2 && (it.lowercase() !in rails || (allowWallet && it.lowercase() in setOf("easypaisa", "jazzcash"))) && it.none(Char::isDigit) }
     }
