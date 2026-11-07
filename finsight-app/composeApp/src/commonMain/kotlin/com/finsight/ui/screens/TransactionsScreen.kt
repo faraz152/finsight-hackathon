@@ -18,24 +18,43 @@ import com.finsight.ui.AppState
 import com.finsight.ui.bandColor
 import com.finsight.ui.designsystem.*
 
+/** Filter chips on the Transactions screen; each has its own empty state. */
+private enum class TxnFilter(val label: String, val emptyTitle: String, val emptyBody: String, val matches: (Transaction) -> Boolean) {
+    ALL("All", "No transactions yet", "Import demo SMS on Home, or enable notification access in Privacy.", { true }),
+    REVIEW("Review", "Nothing to review", "Everything is confident or confirmed by you.", { it.needsReview }),
+    INCOME("Income", "No income yet", "Salary and money you receive show up here.", { it.isIncome }),
+    TRANSFERS("Transfers", "No transfers", "Money sent to or received from people and your own accounts shows up here.",
+        { it.kind == TxnKind.TRANSFER_OUT || it.kind == TxnKind.TRANSFER_IN }),
+    REFUNDS("Refunds", "No refunds or reversals", "Refunds and reversed payments show up here. They never count as income.",
+        { it.kind == TxnKind.REFUND || it.kind == TxnKind.REVERSAL }),
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(state: AppState) {
     val txns by state.repo.transactions.collectAsState()
-    var reviewOnly by remember { mutableStateOf(false) }
+    var filter by remember { mutableStateOf(TxnFilter.ALL) }
     var open by remember { mutableStateOf<Long?>(null) }
-    val shown = if (reviewOnly) txns.filter { it.needsReview } else txns
+    val shown = txns.filter(filter.matches).sortedByDescending { it.timestamp }
+    val today = localDay(state.now())
+    val groups = shown.groupBy { localDay(it.timestamp) }
 
     Column(Modifier.fillMaxSize().padding(horizontal = Spacing.gutter)) {
-        ScreenHeader("Transactions", "${txns.size} records · tap one to see why") {
-            FsChip("Review (${txns.count { it.needsReview }})", selected = reviewOnly, onClick = { reviewOnly = !reviewOnly })
+        ScreenHeader("Transactions", "${txns.size} records · tap one to see why")
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s2), modifier = Modifier.padding(bottom = Spacing.s2)) {
+            items(TxnFilter.entries) { f ->
+                FsChip("${f.label} (${txns.count(f.matches)})", selected = filter == f, onClick = { filter = f })
+            }
         }
-        if (shown.isEmpty()) EmptyState(
-            if (reviewOnly) "Nothing to review" else "No transactions yet",
-            if (reviewOnly) "Everything is confident or confirmed by you." else "Import demo SMS on Home, or enable notification access in Privacy.",
-        )
+        if (shown.isEmpty()) EmptyState(filter.emptyTitle, filter.emptyBody)
         LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.s2)) {
-            items(shown, key = { it.id }) { t -> TxnRow(t) { open = t.id } }
+            groups.forEach { (day, rows) ->
+                item(key = "day-$day") {
+                    Text(dayLabel(day, today), style = FsTheme.type.text.labelSmall, color = FsColors.role.content.tertiary,
+                        modifier = Modifier.padding(top = Spacing.s3))
+                }
+                items(rows, key = { it.id }) { t -> TxnRow(t) { open = t.id } }
+            }
             item { Spacer(Modifier.height(Spacing.s6)) }
         }
     }
@@ -43,6 +62,39 @@ fun TransactionsScreen(state: AppState) {
     if (sel != null) ModalBottomSheet(onDismissRequest = { open = null }, containerColor = FsColors.role.fill.sheet, scrimColor = FsColors.scrim) {
         WhySheet(sel, onCorrect = { c -> state.repo.correct(sel.id, c) }, onDelete = { state.repo.delete(sel.id); open = null })
     }
+}
+
+// Day grouping without java.time (commonMain has no time-zone API). FinSight is Pakistan-first, so days are
+// counted in PKT (UTC+5, no daylight saving) so "Today" does not flip at 5 am local time.
+private const val DAY_MS = 86_400_000L
+private const val LOCAL_OFFSET_MS = 5 * 3_600_000L
+private val WEEKDAYS = arrayOf("Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed") // 1970-01-01 was a Thursday
+private val MONTHS = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/** Days since 1970-01-01 in local (PKT) time. */
+internal fun localDay(epochMs: Long): Long = (epochMs + LOCAL_OFFSET_MS).floorDiv(DAY_MS)
+
+/** "Today", "Yesterday", "Fri 6 Nov", or "Fri 6 Nov 2025" when the year differs from today's. */
+internal fun dayLabel(day: Long, today: Long): String {
+    if (day == today) return "Today"
+    if (day == today - 1) return "Yesterday"
+    val (y, m, d) = civilFromDays(day)
+    val base = "${WEEKDAYS[day.mod(7L).toInt()]} $d ${MONTHS[m - 1]}"
+    return if (y == civilFromDays(today).first) base else "$base $y"
+}
+
+/** Days since epoch → (year, month 1..12, day 1..31). Howard Hinnant's civil_from_days. */
+internal fun civilFromDays(days: Long): Triple<Int, Int, Int> {
+    val z = days + 719_468
+    val era = z.floorDiv(146_097L)
+    val doe = z - era * 146_097
+    val yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365
+    val doy = doe - (365 * yoe + yoe / 4 - yoe / 100)
+    val mp = (5 * doy + 2) / 153
+    val d = (doy - (153 * mp + 2) / 5 + 1).toInt()
+    val m = (if (mp < 10) mp + 3 else mp - 9).toInt()
+    val y = (yoe + era * 400 + if (m <= 2) 1 else 0).toInt()
+    return Triple(y, m, d)
 }
 
 @Composable
