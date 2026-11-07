@@ -67,6 +67,23 @@ android {
         buildConfigField("String", "OPENROUTER_MODEL", "\"${localProps.getProperty("OPENROUTER_MODEL", "google/gemma-4-26b-a4b-it")}\"")
         buildConfigField("String", "GEMINI_MODEL", "\"${localProps.getProperty("GEMINI_MODEL", "gemini-3.8-flash")}\"")
     }
+    signingConfigs {
+        create("release") {
+            val f = localProps.getProperty("RELEASE_STORE_FILE")
+            if (f != null) {
+                storeFile = rootProject.file(f)
+                storePassword = localProps.getProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = localProps.getProperty("RELEASE_KEY_ALIAS")
+                keyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false // keep reflection-based libs (LiteRT-LM, org.json) safe for the demo build
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
     buildFeatures { buildConfig = true }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
     compileOptions {
