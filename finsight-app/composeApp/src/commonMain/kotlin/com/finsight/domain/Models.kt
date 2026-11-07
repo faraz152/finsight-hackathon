@@ -26,7 +26,9 @@ enum class Category(val label: String, val essential: Boolean) {
     FOOD("Food", true), GROCERIES("Groceries", true), TRANSPORT("Transport", true),
     BILLS("Bills & Utilities", true), MOBILE("Mobile & Internet", true), HEALTH("Health", true),
     HOUSING("Housing", true), EDUCATION("Education", true), SHOPPING("Shopping", false),
-    ENTERTAINMENT("Entertainment", false), TRANSFER("Transfer", false), INCOME("Income", false),
+    ENTERTAINMENT("Entertainment", false), PERSONAL_CARE("Personal Care", false), TRAVEL("Travel", false),
+    CHARITY("Charity & Zakat", false), TAXES("Taxes & Govt", true), INVESTMENT("Savings & Investment", false),
+    TRANSFER("Transfer", false), INCOME("Income", false),
     FINANCIAL("Fees & Financial", false), COMMITTEE("Committee", false), OTHER("Other", false),
 }
 
