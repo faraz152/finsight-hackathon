@@ -1,0 +1,4 @@
+sdk.dir=/Users/<you>/Library/Android/sdk
+# Optional: enables Coach HYBRID/CLOUD routes. Never commit the real key.
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-flash-latest

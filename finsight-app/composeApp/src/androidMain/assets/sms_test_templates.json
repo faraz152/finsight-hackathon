@@ -1,0 +1,850 @@
+{
+  "version": "1.0.0",
+  "description": "SMS test templates for FinSight debug test harness",
+  "totalTemplates": 58,
+  "countries": ["PK", "IN", "AE", "GB", "US", "CA"],
+  "templates": [
+    {
+      "id": "pk_jazzcash_credit_01",
+      "country": "PK",
+      "bank": "JazzCash",
+      "sender": "8558",
+      "message": "Rs 50.00 received from naveed online traders, JazzCash Mobile Account: 0335****448. Fee: Rs 0.00. Balance: Rs 50.00. TID: 029462847601.",
+      "expected": {
+        "amount": 50.0,
+        "transactionType": "credit",
+        "merchantName": "naveed online traders",
+        "currency": "PKR",
+        "balance": 50.0,
+        "transactionId": "029462847601"
+      }
+    },
+    {
+      "id": "pk_jazzcash_debit_01",
+      "country": "PK",
+      "bank": "JazzCash",
+      "sender": "8558",
+      "message": "Rs 10,000.00 sent to EasyPaisa Account: 03431237891. Fee: Rs 0.00, Deduction: Rs 10,000.00, Balance: Rs 100.00. TID: 030035934987.",
+      "expected": {
+        "amount": 10000.0,
+        "transactionType": "debit",
+        "merchantName": "EasyPaisa",
+        "currency": "PKR",
+        "balance": 100.0,
+        "transactionId": "030035934987"
+      }
+    },
+    {
+      "id": "pk_jazzcash_debit_02",
+      "country": "PK",
+      "bank": "JazzCash",
+      "sender": "8558",
+      "message": "Rs 1,020.00 sent to SHEHRYAR JazzCash A/C: 03472015623. Fee: Rs 0.00. Deduction: Rs 1,020.00, Balance: Rs 1,014.00. TID: 033050058719.",
+      "expected": {
+        "amount": 1020.0,
+        "transactionType": "debit",
+        "merchantName": "SHEHRYAR",
+        "currency": "PKR",
+        "balance": 1014.0,
+        "transactionId": "033050058719"
+      }
+    },
+    {
+      "id": "pk_jazzcash_credit_02",
+      "country": "PK",
+      "bank": "JazzCash",
+      "sender": "8558",
+      "message": "TID: 029462887962. Cash In of Rs 50.00 by Business Center successful. Fee:Rs 0.00, Pay: Rs 50.00",
+      "expected": {
+        "amount": 50.0,
+        "transactionType": "credit",
+        "merchantName": "Business Center",
+        "currency": "PKR",
+        "transactionId": "029462887962"
+      }
+    },
+    {
+      "id": "pk_jazzcash_debit_03",
+      "country": "PK",
+      "bank": "JazzCash",
+      "sender": "8558",
+      "message": "You have purchased Mobile Load of Rs 100.00 for TELENOR PREPAID mobile number: 03443383112. Fee: Rs 0.00, Deduction: Rs 100.00, Balance: Rs 14.00. TID: 035919397758.",
+      "expected": {
+        "amount": 100.0,
+        "transactionType": "debit",
+        "merchantName": "TELENOR PREPAID",
+        "currency": "PKR",
+        "balance": 14.0,
+        "transactionId": "035919397758"
+      }
+    },
+    {
+      "id": "pk_ubl_debit_01",
+      "country": "PK",
+      "bank": "UBL",
+      "sender": "UBL",
+      "message": "UBL Credit Card *-7182 is charged on 09/02/26 19:45 for PKR 500.00 at SANA SERVICE STATION-TOTA. Avail. Limit: PKR 113048.49. Info: 111825888.",
+      "expected": {
+        "amount": 500.0,
+        "transactionType": "debit",
+        "merchantName": "SANA SERVICE STATION-TOTA",
+        "currency": "PKR",
+        "balance": 113048.49,
+        "cardMask": "7182"
+      }
+    },
+    {
+      "id": "pk_ubl_debit_02",
+      "country": "PK",
+      "bank": "UBL",
+      "sender": "UBL",
+      "message": "UBL MasterCard *-5859 is charged on 11/02/26 at 11:29 PM for PKR 1,400.00 at Google Rob.",
+      "expected": {
+        "amount": 1400.0,
+        "transactionType": "debit",
+        "merchantName": "Google Rob",
+        "currency": "PKR",
+        "cardMask": "5859"
+      }
+    },
+    {
+      "id": "pk_ubl_credit_01",
+      "country": "PK",
+      "bank": "UBL",
+      "sender": "UBL",
+      "message": "credited with PKR 35 on 08/02/26. For info: 111825888.",
+      "expected": {
+        "amount": 35.0,
+        "transactionType": "credit",
+        "currency": "PKR"
+      }
+    },
+    {
+      "id": "pk_easypaisa_credit_01",
+      "country": "PK",
+      "bank": "EasyPaisa",
+      "sender": "3737",
+      "message": "You have received Rs. 500 from 03451234567. Your new balance is Rs. 1,500. TID: EP1234567890",
+      "expected": {
+        "amount": 500.0,
+        "transactionType": "credit",
+        "currency": "PKR",
+        "balance": 1500.0,
+        "transactionId": "EP1234567890"
+      }
+    },
+    {
+      "id": "pk_hbl_debit_01",
+      "country": "PK",
+      "bank": "HBL",
+      "sender": "HBL",
+      "message": "HBL Account XXXX1234 debited with Rs. 5,000 on 15/01/2026. Available Balance: Rs. 25,000. Ref: HBL123456",
+      "expected": {
+        "amount": 5000.0,
+        "transactionType": "debit",
+        "currency": "PKR",
+        "balance": 25000.0,
+        "accountMask": "1234",
+        "transactionId": "HBL123456"
+      }
+    },
+    {
+      "id": "pk_mcb_debit_01",
+      "country": "PK",
+      "bank": "MCB",
+      "sender": "MCB",
+      "message": "MCB Card 1234 used for Rs. 2,500 at SUPERSTORE on 20/01/2026. Available: Rs. 15,000. Ref: 987654321",
+      "expected": {
+        "amount": 2500.0,
+        "transactionType": "debit",
+        "merchantName": "SUPERSTORE",
+        "currency": "PKR",
+        "balance": 15000.0,
+        "cardMask": "1234",
+        "transactionId": "987654321"
+      }
+    },
+    {
+      "id": "pk_meezan_debit_01",
+      "country": "PK",
+      "bank": "Meezan",
+      "sender": "MEEZAN",
+      "message": "Your Meezan Account XXXX5678 has been debited with Rs. 10,000 on 25/01/2026. Balance: Rs. 50,000. Ref: MB123456789",
+      "expected": {
+        "amount": 10000.0,
+        "transactionType": "debit",
+        "currency": "PKR",
+        "balance": 50000.0,
+        "accountMask": "5678",
+        "transactionId": "MB123456789"
+      }
+    },
+    {
+      "id": "pk_sadapay_debit_01",
+      "country": "PK",
+      "bank": "SadaPay",
+      "sender": "SADAPAY",
+      "message": "You spent Rs. 1,200 at Coffee Shop with your SadaPay card. Current balance: Rs. 8,500.",
+      "expected": {
+        "amount": 1200.0,
+        "transactionType": "debit",
+        "merchantName": "Coffee Shop",
+        "currency": "PKR",
+        "balance": 8500.0
+      }
+    },
+    {
+      "id": "pk_nayapay_debit_01",
+      "country": "PK",
+      "bank": "NayaPay",
+      "sender": "NAYAPAY",
+      "message": "Rs. 3,000 paid to Utility Store using NayaPay. Updated balance: Rs. 12,000.",
+      "expected": {
+        "amount": 3000.0,
+        "transactionType": "debit",
+        "merchantName": "Utility Store",
+        "currency": "PKR",
+        "balance": 12000.0
+      }
+    },
+    {
+      "id": "in_paytm_credit_01",
+      "country": "IN",
+      "bank": "Paytm",
+      "sender": "PAYTM",
+      "message": "Rs. 500 credited to your Paytm Wallet. Current balance: Rs. 1,200. Txn ID: P1234567890",
+      "expected": {
+        "amount": 500.0,
+        "transactionType": "credit",
+        "currency": "INR",
+        "balance": 1200.0,
+        "transactionId": "P1234567890"
+      }
+    },
+    {
+      "id": "in_phonepe_debit_01",
+      "country": "IN",
+      "bank": "PhonePe",
+      "sender": "PHONEPE",
+      "message": "₹1,000 paid to Electricity Board via PhonePe UPI. UPI Ref: 123456789012. Your Bank balance: ₹25,000",
+      "expected": {
+        "amount": 1000.0,
+        "transactionType": "debit",
+        "merchantName": "Electricity Board",
+        "currency": "INR",
+        "balance": 25000.0,
+        "transactionId": "123456789012"
+      }
+    },
+    {
+      "id": "in_googlepay_credit_01",
+      "country": "IN",
+      "bank": "Google Pay",
+      "sender": "GPAY",
+      "message": "You received ₹500 from Rahul Sharma via Google Pay. Bank balance: ₹15,000. UPI Ref: 987654321098",
+      "expected": {
+        "amount": 500.0,
+        "transactionType": "credit",
+        "merchantName": "Rahul Sharma",
+        "currency": "INR",
+        "balance": 15000.0,
+        "transactionId": "987654321098"
+      }
+    },
+    {
+      "id": "in_sbi_credit_01",
+      "country": "IN",
+      "bank": "SBI",
+      "sender": "SBI",
+      "message": "Dear Customer, your Account Number XXXXXX6377 has been credited by Rs 215.000 being DBT/DBTL funds transfer on 19/05/2015 - CENTRAL BANK OF INDIA",
+      "expected": {
+        "amount": 215.0,
+        "transactionType": "credit",
+        "currency": "INR",
+        "accountMask": "6377"
+      }
+    },
+    {
+      "id": "in_sbi_debit_01",
+      "country": "IN",
+      "bank": "SBI",
+      "sender": "SBI",
+      "message": "A/c NN5715 debited for Rs 2000; ATM WDL. A/c Bal(sub to chq realisatn) Rs13286.23 on 24APR 21:19hr. Call 1800226999 to block your card if not used by you.",
+      "expected": {
+        "amount": 2000.0,
+        "transactionType": "debit",
+        "currency": "INR",
+        "balance": 13286.23,
+        "accountMask": "5715"
+      }
+    },
+    {
+      "id": "in_sbi_credit_02",
+      "country": "IN",
+      "bank": "SBI",
+      "sender": "SBI",
+      "message": "Dear Customer, Your Ac XXXXXXXX5666 is credited with INR8,922.00 on 16 Feb. Info. INF*000080483346*SALARY. Your Net Available Bal is INR 8,922.00.",
+      "expected": {
+        "amount": 8922.0,
+        "transactionType": "credit",
+        "currency": "INR",
+        "balance": 8922.0,
+        "accountMask": "5666"
+      }
+    },
+    {
+      "id": "in_hdfc_debit_01",
+      "country": "IN",
+      "bank": "HDFC",
+      "sender": "HDFC",
+      "message": "HDFC Bank: Rs.15,000 debited from a/c **1234 on 20-01-2026. Avl Bal: Rs.45,000. If not done by you, call 1800-XXX-XXXX immediately.",
+      "expected": {
+        "amount": 15000.0,
+        "transactionType": "debit",
+        "currency": "INR",
+        "balance": 45000.0,
+        "accountMask": "1234"
+      }
+    },
+    {
+      "id": "in_icici_debit_01",
+      "country": "IN",
+      "bank": "ICICI",
+      "sender": "ICICI",
+      "message": "ICICI Bank Account XX4567 debited with Rs.2,500 on Jan 20. Available Balance: Rs.32,000. Call 1800-XXX-XXXX if unauthorized.",
+      "expected": {
+        "amount": 2500.0,
+        "transactionType": "debit",
+        "currency": "INR",
+        "balance": 32000.0,
+        "accountMask": "4567"
+      }
+    },
+    {
+      "id": "in_axis_debit_01",
+      "country": "IN",
+      "bank": "Axis Bank",
+      "sender": "AXIS",
+      "message": "Axis Bank: Your a/c XX7890 debited for Rs.3,500 on 25/01/26. Available Balance: Rs.28,500.",
+      "expected": {
+        "amount": 3500.0,
+        "transactionType": "debit",
+        "currency": "INR",
+        "balance": 28500.0,
+        "accountMask": "7890"
+      }
+    },
+    {
+      "id": "in_kotak_debit_01",
+      "country": "IN",
+      "bank": "Kotak",
+      "sender": "KOTAK",
+      "message": "Kotak Bank: Rs.5,000 debited from your account ending 9012. Updated balance: Rs.42,000.",
+      "expected": {
+        "amount": 5000.0,
+        "transactionType": "debit",
+        "currency": "INR",
+        "balance": 42000.0,
+        "accountMask": "9012"
+      }
+    },
+    {
+      "id": "ae_enbd_debit_01",
+      "country": "AE",
+      "bank": "Emirates NBD",
+      "sender": "ENBD",
+      "message": "Emirates NBD: AED 250.00 debited from your Card ending 1234 at CARREFOUR on 20/01/2026. Available Balance: AED 5,500. Ref: EN123456789",
+      "expected": {
+        "amount": 250.0,
+        "transactionType": "debit",
+        "merchantName": "CARREFOUR",
+        "currency": "AED",
+        "balance": 5500.0,
+        "cardMask": "1234",
+        "transactionId": "EN123456789"
+      }
+    },
+    {
+      "id": "ae_adcb_credit_01",
+      "country": "AE",
+      "bank": "ADCB",
+      "sender": "ADCB",
+      "message": "ADCB: Salary Deposited to your account ending 4567. Amount: AED 15,000. Balance: AED 25,000.",
+      "expected": {
+        "amount": 15000.0,
+        "transactionType": "credit",
+        "currency": "AED",
+        "balance": 25000.0,
+        "accountMask": "4567"
+      }
+    },
+    {
+      "id": "ae_mashreq_debit_01",
+      "country": "AE",
+      "bank": "Mashreq",
+      "sender": "MASHREQ",
+      "message": "Mashreq Bank: AED 1,200 spent at GROCERY STORE using Card ending 7890. Available Balance: AED 8,500.",
+      "expected": {
+        "amount": 1200.0,
+        "transactionType": "debit",
+        "merchantName": "GROCERY STORE",
+        "currency": "AED",
+        "balance": 8500.0,
+        "cardMask": "7890"
+      }
+    },
+    {
+      "id": "ae_fab_debit_01",
+      "country": "AE",
+      "bank": "FAB",
+      "sender": "FAB",
+      "message": "FAB: AED 3,500 debited from your account ending 2345. Balance: AED 45,000. Ref: FAB987654321",
+      "expected": {
+        "amount": 3500.0,
+        "transactionType": "debit",
+        "currency": "AED",
+        "balance": 45000.0,
+        "accountMask": "2345",
+        "transactionId": "FAB987654321"
+      }
+    },
+    {
+      "id": "ae_liv_debit_01",
+      "country": "AE",
+      "bank": "Liv.",
+      "sender": "LIV",
+      "message": "You spent AED 85.00 at STARBUCKS with your Liv card. New balance: AED 2,150.",
+      "expected": {
+        "amount": 85.0,
+        "transactionType": "debit",
+        "merchantName": "STARBUCKS",
+        "currency": "AED",
+        "balance": 2150.0
+      }
+    },
+    {
+      "id": "gb_barclays_debit_01",
+      "country": "GB",
+      "bank": "Barclays",
+      "sender": "Barclays",
+      "message": "Barclays: £50.00 spent at TESCO using card ending 1234 on 20/01/26. Balance: £2,500. Ref: BAR987654321",
+      "expected": {
+        "amount": 50.0,
+        "transactionType": "debit",
+        "merchantName": "TESCO",
+        "currency": "GBP",
+        "balance": 2500.0,
+        "cardMask": "1234",
+        "transactionId": "BAR987654321"
+      }
+    },
+    {
+      "id": "gb_barclays_credit_01",
+      "country": "GB",
+      "bank": "Barclays",
+      "sender": "Barclays",
+      "message": "£1,200.00 received from JOHN SMITH. Your new balance is £5,500.",
+      "expected": {
+        "amount": 1200.0,
+        "transactionType": "credit",
+        "merchantName": "JOHN SMITH",
+        "currency": "GBP",
+        "balance": 5500.0
+      }
+    },
+    {
+      "id": "gb_hsbc_debit_01",
+      "country": "GB",
+      "bank": "HSBC",
+      "sender": "HSBC",
+      "message": "HSBC: £75.00 debited from your account at AMAZON on 25/01/26. Available Balance: £3,200. Ref: HS123456789",
+      "expected": {
+        "amount": 75.0,
+        "transactionType": "debit",
+        "merchantName": "AMAZON",
+        "currency": "GBP",
+        "balance": 3200.0,
+        "transactionId": "HS123456789"
+      }
+    },
+    {
+      "id": "gb_lloyds_debit_01",
+      "country": "GB",
+      "bank": "Lloyds",
+      "sender": "Lloyds",
+      "message": "Lloyds Bank: £200.00 sent to JANE DOE on 15/01/26. Balance: £1,800. Ref: LL987654321",
+      "expected": {
+        "amount": 200.0,
+        "transactionType": "debit",
+        "merchantName": "JANE DOE",
+        "currency": "GBP",
+        "balance": 1800.0,
+        "transactionId": "LL987654321"
+      }
+    },
+    {
+      "id": "gb_natwest_credit_01",
+      "country": "GB",
+      "bank": "NatWest",
+      "sender": "NatWest",
+      "message": "NatWest: £1,500.00 received from EMPLOYER LTD on 31/01/26. Your new balance is £4,200.",
+      "expected": {
+        "amount": 1500.0,
+        "transactionType": "credit",
+        "merchantName": "EMPLOYER LTD",
+        "currency": "GBP",
+        "balance": 4200.0
+      }
+    },
+    {
+      "id": "gb_santander_debit_01",
+      "country": "GB",
+      "bank": "Santander",
+      "sender": "Santander",
+      "message": "Santander: £45.00 spent at SAINSBURYS using your debit card. Available: £1,250.",
+      "expected": {
+        "amount": 45.0,
+        "transactionType": "debit",
+        "merchantName": "SAINSBURYS",
+        "currency": "GBP",
+        "balance": 1250.0
+      }
+    },
+    {
+      "id": "gb_monzo_debit_01",
+      "country": "GB",
+      "bank": "Monzo",
+      "sender": "Monzo",
+      "message": "Monzo: You spent £45.67 at STARBUCKS. Balance: £1,234.56",
+      "expected": {
+        "amount": 45.67,
+        "transactionType": "debit",
+        "merchantName": "STARBUCKS",
+        "currency": "GBP",
+        "balance": 1234.56
+      }
+    },
+    {
+      "id": "gb_monzo_credit_01",
+      "country": "GB",
+      "bank": "Monzo",
+      "sender": "Monzo",
+      "message": "Monzo: £500.00 received from John Smith. New balance: £1,734.56",
+      "expected": {
+        "amount": 500.0,
+        "transactionType": "credit",
+        "merchantName": "John Smith",
+        "currency": "GBP",
+        "balance": 1734.56
+      }
+    },
+    {
+      "id": "gb_monzo_debit_02",
+      "country": "GB",
+      "bank": "Monzo",
+      "sender": "Monzo",
+      "message": "Monzo: You sent £100.00 to Sarah Jones. Balance: £1,134.56",
+      "expected": {
+        "amount": 100.0,
+        "transactionType": "debit",
+        "merchantName": "Sarah Jones",
+        "currency": "GBP",
+        "balance": 1134.56
+      }
+    },
+    {
+      "id": "gb_revolut_debit_01",
+      "country": "GB",
+      "bank": "Revolut",
+      "sender": "Revolut",
+      "message": "Revolut: £250.00 spent at AMAZON. Current balance: £3,450.00",
+      "expected": {
+        "amount": 250.0,
+        "transactionType": "debit",
+        "merchantName": "AMAZON",
+        "currency": "GBP",
+        "balance": 3450.0
+      }
+    },
+    {
+      "id": "gb_revolut_credit_01",
+      "country": "GB",
+      "bank": "Revolut",
+      "sender": "Revolut",
+      "message": "Revolut: You received £1,000.00 from Michael Brown. Balance: £4,450.00",
+      "expected": {
+        "amount": 1000.0,
+        "transactionType": "credit",
+        "merchantName": "Michael Brown",
+        "currency": "GBP",
+        "balance": 4450.0
+      }
+    },
+    {
+      "id": "us_chase_debit_01",
+      "country": "US",
+      "bank": "Chase",
+      "sender": "Chase",
+      "message": "Chase: $125.00 spent at WHOLE FOODS MARKET using card ending 1234 on 01/20/26. If not you, reply NO.",
+      "expected": {
+        "amount": 125.0,
+        "transactionType": "debit",
+        "merchantName": "WHOLE FOODS MARKET",
+        "currency": "USD",
+        "cardMask": "1234"
+      }
+    },
+    {
+      "id": "us_chase_credit_01",
+      "country": "US",
+      "bank": "Chase",
+      "sender": "Chase",
+      "message": "$2,500.00 deposited to your Chase checking account ending 5678. Balance: $8,500. Ref: CH123456789",
+      "expected": {
+        "amount": 2500.0,
+        "transactionType": "credit",
+        "currency": "USD",
+        "balance": 8500.0,
+        "accountMask": "5678",
+        "transactionId": "CH123456789"
+      }
+    },
+    {
+      "id": "us_bofa_debit_01",
+      "country": "US",
+      "bank": "Bank of America",
+      "sender": "BofA",
+      "message": "Bank of America: $350.00 spent at BEST BUY on 01/15/26 using debit card ending 9012. Available: $2,100.",
+      "expected": {
+        "amount": 350.0,
+        "transactionType": "debit",
+        "merchantName": "BEST BUY",
+        "currency": "USD",
+        "balance": 2100.0,
+        "cardMask": "9012"
+      }
+    },
+    {
+      "id": "us_wells_debit_01",
+      "country": "US",
+      "bank": "Wells Fargo",
+      "sender": "WellsFargo",
+      "message": "Wells Fargo: $85.00 debited from checking account ending 3456 at SHELL OIL on 01/18/26. Balance: $1,500.",
+      "expected": {
+        "amount": 85.0,
+        "transactionType": "debit",
+        "merchantName": "SHELL OIL",
+        "currency": "USD",
+        "balance": 1500.0,
+        "accountMask": "3456"
+      }
+    },
+    {
+      "id": "us_citi_debit_01",
+      "country": "US",
+      "bank": "Citibank",
+      "sender": "Citibank",
+      "message": "Citibank: $200.00 charged to your Citi Double Cash card at RESTAURANT on 01/22/26. Available: $3,200.",
+      "expected": {
+        "amount": 200.0,
+        "transactionType": "debit",
+        "merchantName": "RESTAURANT",
+        "currency": "USD",
+        "balance": 3200.0
+      }
+    },
+    {
+      "id": "us_usbank_credit_01",
+      "country": "US",
+      "bank": "U.S. Bank",
+      "sender": "USBank",
+      "message": "U.S. Bank: $1,200.00 deposited to your account ending 7890. Balance: $5,500.",
+      "expected": {
+        "amount": 1200.0,
+        "transactionType": "credit",
+        "currency": "USD",
+        "balance": 5500.0,
+        "accountMask": "7890"
+      }
+    },
+    {
+      "id": "us_capitalone_debit_01",
+      "country": "US",
+      "bank": "Capital One",
+      "sender": "CapitalOne",
+      "message": "Capital One: $45.00 spent at STARBUCKS with your Venture card on 01/19/26.",
+      "expected": {
+        "amount": 45.0,
+        "transactionType": "debit",
+        "merchantName": "STARBUCKS",
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "us_venmo_debit_01",
+      "country": "US",
+      "bank": "Venmo",
+      "sender": "Venmo",
+      "message": "Venmo: You paid $75.00 to @username. Your Venmo balance is $234.56",
+      "expected": {
+        "amount": 75.0,
+        "transactionType": "debit",
+        "merchantName": "@username",
+        "currency": "USD",
+        "balance": 234.56
+      }
+    },
+    {
+      "id": "us_venmo_credit_01",
+      "country": "US",
+      "bank": "Venmo",
+      "sender": "Venmo",
+      "message": "Venmo: $120.00 received from @friendname. New balance: $354.56",
+      "expected": {
+        "amount": 120.0,
+        "transactionType": "credit",
+        "merchantName": "@friendname",
+        "currency": "USD",
+        "balance": 354.56
+      }
+    },
+    {
+      "id": "us_venmo_debit_02",
+      "country": "US",
+      "bank": "Venmo",
+      "sender": "Venmo",
+      "message": "Venmo: Transfer of $200.00 to your bank initiated. Venmo balance: $154.56",
+      "expected": {
+        "amount": 200.0,
+        "transactionType": "transfer",
+        "currency": "USD",
+        "balance": 154.56
+      }
+    },
+    {
+      "id": "ca_rbc_debit_01",
+      "country": "CA",
+      "bank": "RBC",
+      "sender": "RBC",
+      "message": "RBC: $85.50 spent at TIM HORTONS using card ending 1234 on 2026-01-20. Available: $2,500. Ref: RBC987654321",
+      "expected": {
+        "amount": 85.5,
+        "transactionType": "debit",
+        "merchantName": "TIM HORTONS",
+        "currency": "CAD",
+        "balance": 2500.0,
+        "cardMask": "1234",
+        "transactionId": "RBC987654321"
+      }
+    },
+    {
+      "id": "ca_rbc_credit_01",
+      "country": "CA",
+      "bank": "RBC",
+      "sender": "RBC",
+      "message": "Interac e-Transfer received from JOHN DOE: $250.00. Message: Dinner. Your new balance is $3,200.",
+      "expected": {
+        "amount": 250.0,
+        "transactionType": "credit",
+        "merchantName": "JOHN DOE",
+        "currency": "CAD",
+        "balance": 3200.0
+      }
+    },
+    {
+      "id": "ca_td_credit_01",
+      "country": "CA",
+      "bank": "TD",
+      "sender": "TD",
+      "message": "TD: $1,200.00 deposited to your Chequing account ending 5678. Balance: $4,500.",
+      "expected": {
+        "amount": 1200.0,
+        "transactionType": "credit",
+        "currency": "CAD",
+        "balance": 4500.0,
+        "accountMask": "5678"
+      }
+    },
+    {
+      "id": "ca_scotia_debit_01",
+      "country": "CA",
+      "bank": "Scotiabank",
+      "sender": "Scotia",
+      "message": "Scotiabank: $350.00 charged to your Visa at GROCERY STORE on 2026-01-15. Available: $2,800.",
+      "expected": {
+        "amount": 350.0,
+        "transactionType": "debit",
+        "merchantName": "GROCERY STORE",
+        "currency": "CAD",
+        "balance": 2800.0
+      }
+    },
+    {
+      "id": "ca_bmo_credit_01",
+      "country": "CA",
+      "bank": "BMO",
+      "sender": "BMO",
+      "message": "BMO: $500.00 deposited to your account ending 9012. Balance: $3,200.",
+      "expected": {
+        "amount": 500.0,
+        "transactionType": "credit",
+        "currency": "CAD",
+        "balance": 3200.0,
+        "accountMask": "9012"
+      }
+    },
+    {
+      "id": "ca_cibc_debit_01",
+      "country": "CA",
+      "bank": "CIBC",
+      "sender": "CIBC",
+      "message": "CIBC: $75.00 spent at ESSO using your debit card. Available: $1,800.",
+      "expected": {
+        "amount": 75.0,
+        "transactionType": "debit",
+        "merchantName": "ESSO",
+        "currency": "CAD",
+        "balance": 1800.0
+      }
+    },
+    {
+      "id": "ca_wealth_credit_01",
+      "country": "CA",
+      "bank": "Wealthsimple",
+      "sender": "Wealthsimple",
+      "message": "Wealthsimple: CAD 1,000.00 deposited to your account. New balance: CAD 15,000.00",
+      "expected": {
+        "amount": 1000.0,
+        "transactionType": "credit",
+        "currency": "CAD",
+        "balance": 15000.0
+      }
+    },
+    {
+      "id": "ca_wealth_debit_01",
+      "country": "CA",
+      "bank": "Wealthsimple",
+      "sender": "Wealthsimple",
+      "message": "Wealthsimple: CAD 250.00 withdrawn. Balance: CAD 12,750.00",
+      "expected": {
+        "amount": 250.0,
+        "transactionType": "debit",
+        "currency": "CAD",
+        "balance": 12750.0
+      }
+    },
+    {
+      "id": "ca_wealth_credit_02",
+      "country": "CA",
+      "bank": "Wealthsimple",
+      "sender": "Wealthsimple",
+      "message": "Wealthsimple: Dividend of CAD 45.67 received. New balance: CAD 14,845.67",
+      "expected": {
+        "amount": 45.67,
+        "transactionType": "credit",
+        "currency": "CAD",
+        "balance": 14845.67
+      }
+    }
+  ]
+}

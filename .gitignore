@@ -1,0 +1,11 @@
+# reference repos (private, read-only, cloned locally)
+ref/
+# build / IDE
+.gradle/
+build/
+.kotlin/
+.idea/
+*.iml
+.DS_Store
+# secrets
+local.properties
