@@ -1,0 +1,47 @@
+package com.finsight.pipeline
+
+import com.finsight.domain.TxnKind
+import com.finsight.domain.TxnStatus
+import com.finsight.domain.TxnType
+
+/** Transaction Integrity Layer (plan 6.2): kind, status, fingerprint. Duplicate merge happens in the repository. */
+object Integrity {
+    private val reversal = Regex("""(reversed|reversal|reverted)""", RegexOption.IGNORE_CASE)
+    private val refund = Regex("""(refund|refunded|cashback)""", RegexOption.IGNORE_CASE)
+    private val pending = Regex("""(pending|on hold|authori[sz]ation hold|is being processed)""", RegexOption.IGNORE_CASE)
+    private val fee = Regex("""(service charges?|annual fee|sms charges|excise duty|withholding tax|wht\b|late payment charge)""", RegexOption.IGNORE_CASE)
+    private val transferOut = Regex("""(sent to|transferred to|funds transfer|ibft|raast|to .*account|to .*a/c|wallet to)""", RegexOption.IGNORE_CASE)
+    private val transferIn = Regex("""(received from|transfer(red)? from|ibft from|raast from)""", RegexOption.IGNORE_CASE)
+    private val salary = Regex("""(salary|payroll)""", RegexOption.IGNORE_CASE)
+
+    data class Classification(val kind: TxnKind, val status: TxnStatus, val reasons: List<String>)
+
+    fun classify(text: String, type: TxnType, ownAccounts: Set<String>, counterpartyLast4: String?): Classification {
+        val r = mutableListOf<String>()
+        val status = if (pending.containsMatchIn(text)) TxnStatus.PENDING.also { r += "Marked pending (\"${pending.find(text)!!.value}\")" } else TxnStatus.POSTED
+        val kind = when {
+            reversal.containsMatchIn(text) -> TxnKind.REVERSAL.also { r += "Reversal wording: excluded from spend and income" }
+            refund.containsMatchIn(text) && type == TxnType.CREDIT -> TxnKind.REFUND.also { r += "Refund: not counted as income" }
+            fee.containsMatchIn(text) && type == TxnType.DEBIT -> TxnKind.FEE.also { r += "Bank fee / tax" }
+            type == TxnType.DEBIT && counterpartyLast4 != null && counterpartyLast4 in ownAccounts ->
+                TxnKind.TRANSFER_OUT.also { r += "Transfer to your own account ••$counterpartyLast4" }
+            type == TxnType.CREDIT && salary.containsMatchIn(text) -> TxnKind.INCOME.also { r += "Salary credit" }
+            type == TxnType.CREDIT && transferIn.containsMatchIn(text) -> TxnKind.INCOME.also { r += "Incoming transfer counted as income" }
+            type == TxnType.DEBIT && transferOut.containsMatchIn(text) -> TxnKind.TRANSFER_OUT.also { r += "Outgoing transfer" }
+            type == TxnType.CREDIT -> TxnKind.INCOME
+            else -> TxnKind.EXPENSE
+        }
+        return Classification(kind, status, r)
+    }
+
+    /** Same payment seen twice (SMS + app notification) must produce the same fingerprint. */
+    fun fingerprint(merchantKey: String?, amountMinor: Long, last4: String?, ref: String?, @Suppress("UNUSED_PARAMETER") timestamp: Long): String {
+        if (!ref.isNullOrBlank()) return "ref:$ref"
+        return "fp:${merchantKey ?: "-"}|$amountMinor|${last4 ?: "-"}"
+    }
+
+    fun merchantKey(merchant: String?): String? =
+        merchant?.lowercase()?.replace(Regex("""[^a-z0-9 ]"""), " ")?.split(" ")?.filter { it.isNotBlank() }
+            ?.filterNot { it in setOf("pvt", "ltd", "the", "account", "a", "c", "mobile", "jazzcash", "easypaisa") }
+            ?.take(3)?.joinToString(" ")?.ifBlank { null }
+}
