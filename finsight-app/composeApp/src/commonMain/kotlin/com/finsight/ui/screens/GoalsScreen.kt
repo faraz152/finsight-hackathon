@@ -15,7 +15,8 @@ import com.finsight.ui.designsystem.*
 fun GoalsScreen(state: AppState, onBack: () -> Unit) {
     var price by remember { mutableStateOf("") }
     var result by remember { mutableStateOf<com.finsight.coach.WhatIfResult?>(null) }
-    val recurring = state.tools.recurringPayments()
+    val txns by state.repo.transactions.collectAsState()
+    val recurring = remember(txns) { state.tools.recurringPayments() }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = Spacing.gutter),
