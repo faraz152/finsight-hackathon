@@ -64,7 +64,7 @@ android {
         versionName = "0.1-hackathon"
         buildConfigField("String", "GEMINI_API_KEY", "\"${localProps.getProperty("GEMINI_API_KEY", "")}\"")
         buildConfigField("String", "OPENROUTER_API_KEY", "\"${localProps.getProperty("OPENROUTER_API_KEY", "")}\"")
-        buildConfigField("String", "OPENROUTER_MODEL", "\"${localProps.getProperty("OPENROUTER_MODEL", "google/gemini-3.8-flash")}\"")
+        buildConfigField("String", "OPENROUTER_MODEL", "\"${localProps.getProperty("OPENROUTER_MODEL", "google/gemma-4-26b-a4b-it")}\"")
         buildConfigField("String", "GEMINI_MODEL", "\"${localProps.getProperty("GEMINI_MODEL", "gemini-3.8-flash")}\"")
     }
     buildFeatures { buildConfig = true }

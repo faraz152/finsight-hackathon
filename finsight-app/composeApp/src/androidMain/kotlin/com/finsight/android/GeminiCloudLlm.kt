@@ -27,14 +27,19 @@ class GeminiCloudLlm(
 ) : CloudLlm {
     override val configured: Boolean get() = geminiKey.isNotBlank() || openRouterKey.isNotBlank()
 
+    /** A key that is rejected (401/403/404) stays rejected: skip it for the rest of the session. */
+    @Volatile private var geminiDead = false
     @Volatile private var lastUsed: String = if (geminiKey.isNotBlank()) geminiModel else "$openRouterModel (OpenRouter)"
     override val modelName: String get() = lastUsed
 
     override suspend fun complete(prompt: SanitizedPrompt): String = withContext(Dispatchers.IO) {
         if (!configured) throw CloudUnavailable("no key")
         val errors = mutableListOf<String>()
-        if (geminiKey.isNotBlank()) {
-            try { return@withContext callGemini(prompt).also { lastUsed = geminiModel } } catch (e: Exception) { errors += "Gemini: ${e.message}" }
+        if (geminiKey.isNotBlank() && !geminiDead) {
+            try { return@withContext callGemini(prompt).also { lastUsed = geminiModel } } catch (e: Exception) {
+                errors += "Gemini: ${e.message}"
+                if (e.message?.let { m -> listOf("HTTP 401", "HTTP 403", "HTTP 404").any { m.startsWith(it) } } == true) geminiDead = true
+            }
         }
         if (openRouterKey.isNotBlank()) {
             try { return@withContext callOpenRouter(prompt).also { lastUsed = "$openRouterModel (OpenRouter)" } } catch (e: Exception) { errors += "OpenRouter: ${e.message}" }
@@ -65,7 +70,7 @@ class GeminiCloudLlm(
 
     private fun post(url: String, body: JSONObject, headers: Map<String, String>): String {
         val conn = (URL(url).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"; connectTimeout = 6000; readTimeout = 9000; doOutput = true
+            requestMethod = "POST"; connectTimeout = 5000; readTimeout = 12000; doOutput = true
             setRequestProperty("Content-Type", "application/json")
             headers.forEach { (k, v) -> setRequestProperty(k, v) }
         }

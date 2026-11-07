@@ -85,7 +85,7 @@ class CoachAgent(
         val prompt = Redactor.build(scrubbed!!, facts)
         val t0 = now()
         return try {
-            val raw = withTimeout(9_000) { cloud.complete(prompt) }
+            val raw = withTimeout(15_000) { cloud.complete(prompt) }
             val (verified, dropped) = NumberVerifier.verify(raw, facts)
             log.add(CloudLogEntry(t0, route.badge, cloud.modelName, prompt.payloadJson(), now() - t0, if (dropped > 0) "ok, $dropped sentence(s) removed by verifier" else "ok"))
             val text = if (intent == Intent.GENERAL) verified else local.text + "\n\n" + verified

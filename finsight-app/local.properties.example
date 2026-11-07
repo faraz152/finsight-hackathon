@@ -4,4 +4,4 @@ GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.8-flash
 # Optional fallback: Gemini via OpenRouter (used only if the Google key fails). Never commit.
 OPENROUTER_API_KEY=
-OPENROUTER_MODEL=google/gemini-3.8-flash
+OPENROUTER_MODEL=google/gemma-4-26b-a4b-it
