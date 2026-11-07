@@ -95,6 +95,8 @@ fun PrivacyScreen(state: AppState) {
             SectionHeader("Your data")
             Text("${txns.size} records stored only in this app's private storage. Backup to cloud is disabled.", style = type.text.bodyMedium, color = FsColors.role.content.secondary)
             Spacer(Modifier.height(Spacing.s3))
+            FsButton("Sign out" + (state.demoUser.value?.let { " ($it)" } ?: ""), { state.demoUser.value = null }, Modifier.fillMaxWidth(), variant = FsButtonVariant.Secondary)
+            Spacer(Modifier.height(Spacing.s2))
             FsButton("Delete all local data", { state.repo.clearAll(); state.log.clear() }, Modifier.fillMaxWidth(), variant = FsButtonVariant.Destructive)
         }
         Spacer(Modifier.height(Spacing.s6))

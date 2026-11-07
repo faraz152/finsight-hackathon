@@ -32,11 +32,14 @@ class AppState(
     val cloudEnabled = MutableStateFlow(store?.read("cloud_enabled")?.toBooleanStrictOrNull() ?: true)
     val profile = MutableStateFlow(store?.read("profile")?.let { p -> Profile.entries.firstOrNull { it.name == p } } ?: Profile.SALARIED)
     /** First-launch onboarding with the prominent disclosure (plan 6.4) has been completed. */
+    /** Demo sign-in (real Google Sign-In is roadmap): display name of the signed-in demo user, null = signed out. */
+    val demoUser = MutableStateFlow<String?>(store?.read("demo_user")?.ifBlank { null })
     val onboarded = MutableStateFlow(store?.read("onboarded")?.toBooleanStrictOrNull() ?: false)
     init { if (store != null) CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
         launch { cloudEnabled.drop(1).collect { store.write("cloud_enabled", it.toString()) } }
         launch { profile.drop(1).collect { store.write("profile", it.name) } }
         launch { onboarded.drop(1).collect { store.write("onboarded", it.toString()) } }
+        launch { demoUser.drop(1).collect { store.write("demo_user", it ?: "") } }
     } }
     /** Text to pre-fill (or auto-send) in Coach, set by the centre quick actions. */
     val coachDraft = MutableStateFlow<String?>(null)

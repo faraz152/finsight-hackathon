@@ -17,7 +17,11 @@ fun App(state: AppState) {
     FsTheme {
         val onboarded by state.onboarded.collectAsState()
         // First launch: full-screen onboarding + prominent disclosure, no tabs or bottom bar.
-        if (onboarded) MainShell(state)
+        val user by state.demoUser.collectAsState()
+        if (onboarded && user == null) Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas).statusBarsPadding().navigationBarsPadding()) {
+            LoginScreen(state)
+        }
+        else if (onboarded) MainShell(state)
         else Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas).statusBarsPadding().navigationBarsPadding()) {
             OnboardingScreen(state)
         }
