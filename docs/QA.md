@@ -7,7 +7,7 @@ Short answers first; the detail line is for follow-ups. Be honest about what is 
 ### "You say private, but the app has the INTERNET permission."
 Your transactions never leave the phone. `INTERNET` is used by exactly one class, `GeminiCloudLlm.kt`, and it only accepts a `SanitizedPrompt`. That type has a private constructor; only the on-device `Redactor` can build one, from an allowlist of facts (percentages, amounts rounded to PKR 1,000, category shares, counts). So the type system makes the Redactor the only way to reach the cloud, and the Redactor only passes allowlisted facts and a scrubbed question (no merchants, phone numbers or account digits).
 - Proof on the phone: "What was shared?" on every answer, and Privacy → Cloud log with the exact payload.
-- Proof in the repo: grep for network classes finds only that one file. An automated architecture test (Konsist) is the next step; today it is enforced by the type system plus code review.
+- Proof in the repo: `PrivacyBoundaryTest` fails the build if network code appears in any file other than `GeminiCloudLlm.kt`, and checks that the cloud client only accepts `SanitizedPrompt` (private constructor).
 - One switch in the Privacy Center turns cloud AI off entirely.
 
 ### "Why not just read SMS with READ_SMS?"
@@ -41,7 +41,7 @@ All personal numbers come from Kotlin tools on the device; the model never compu
 Capture, the pipeline, Health, Pulse, What If and local Coach answers need no network. If the cloud is off, unreachable, slow (9 s) or there is no key, the router answers on the device and says why.
 
 ### "What's stored, and where?"
-In this prototype, in memory only, inside the app process; `allowBackup="false"` so nothing goes to Android cloud backup. Production: SQLDelight with SQLCipher and a key in Android Keystore, plus an optional biometric lock.
+In this prototype, app-private files on the phone (`filesDir/finsight_store`), written atomically; `allowBackup="false"` so nothing goes to Android cloud backup. Production: SQLDelight with SQLCipher and a key in Android Keystore, plus an optional biometric lock.
 
 ### "iOS?"
 The pipeline, Coach, privacy layer and UI are in `commonMain`, so they move to iOS unchanged. iOS does not let apps read other apps' notifications, so iOS input would be share-sheet, statement import, receipt scan and manual entry. Android first because automatic capture is the core experience and Android is the large majority of phones in Pakistan.
@@ -61,6 +61,6 @@ The code was written fresh today. We reused data and design from the team's earl
 3. Onboarding with prominent disclosure; per-app source toggles.
 4. Statement import (CSV/PDF) and receipt scan with multimodal Gemma.
 5. Goals, recurring-bill reminders, monthly report with PDF export.
-6. Architecture test that fails the build if network code appears outside the cloud class; Firebase AI Logic with App Check for the Gemini call.
+6. Firebase AI Logic with App Check for the Gemini call (the architecture test is already in place).
 7. Evaluation on a held-out set of unseen formats; category precision/recall.
 8. iOS with share-sheet and import as input.

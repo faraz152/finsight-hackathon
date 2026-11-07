@@ -47,7 +47,7 @@ Verified against the code on `main`. Items marked *roadmap* are not in this buil
 Home · Transactions (Review filter, "Why?" sheet) · centre hexagon quick actions (Add transaction, Ask Coach, Can I afford it?, Import messages, Scan receipt *locked*) · Coach ("What was shared?" sheet) · Privacy Center (notification access, cloud switch, cloud log, delete all).
 
 ### Known limits of this build
-- Storage is in memory: data is gone when the app process ends. SQLDelight + SQLCipher is roadmap.
+- Storage: app-private files (`filesDir/finsight_store`), atomic writes, survives restarts. SQLDelight + SQLCipher encryption is roadmap.
 - The confidence score is a heuristic, not a calibrated probability.
 - Data coverage is computed from balance chains (or active days), not from all your accounts.
 - No onboarding flow yet; the Privacy tab carries the disclosure and the notification-access button.
@@ -85,7 +85,7 @@ Home · Transactions (Review filter, "Why?" sheet) · centre hexagon quick actio
 │  │ Tools · HealthScore · Pulse · WhatIf · CoachLog (cloud log)    │  │
 │  └────────────────────────────────────────────────────────────────┘  │
 │                                                                      │
-│  Repository (in-memory StateFlow)                                    │
+│  Repository (StateFlow + file store)                                 │
 │  interface LocalLlm (NoLocalLlm today)                               │
 │  interface CloudLlm { complete(SanitizedPrompt) }                    │
 └──────────────┬────────────────────────┬──────────────────────────────┘
@@ -114,7 +114,7 @@ Money is `Long` minor units (paisa) plus an ISO currency code, never `Double`.
 | Questions naming a merchant, phone number or long digit string stay local | `Redactor.scrub()` returns null; the router forces LOCAL and the answer says why. |
 | Cloud cannot invent figures about you | `NumberVerifier.verify()` drops any personal sentence whose numbers are not in the facts sent; the answer says how many were removed. |
 | Every cloud call is inspectable | `CoachLog` stores route, model, exact payload, latency and status; shown in Privacy → Cloud log, and per answer in "What was shared?". |
-| Exactly one file touches the network | `androidMain/.../GeminiCloudLlm.kt`. Check: `grep -rlE 'java\.net\|HttpURLConnection\|okhttp\|ktor' finsight-app/composeApp/src` returns only that file. (An automated architecture test is roadmap.) |
+| Exactly one file touches the network | `androidMain/.../GeminiCloudLlm.kt`. Check: `grep -rlE 'java\.net\|HttpURLConnection\|okhttp\|ktor' finsight-app/composeApp/src` returns only that file; `PrivacyBoundaryTest` enforces it in CI. |
 | No SMS inbox access | Manifest has no `READ_SMS` / `RECEIVE_SMS`. Capture is a `NotificationListenerService` with a package allowlist. |
 | No cloud backup of your data | `android:allowBackup="false"`. |
 | User control | Cloud AI switch (Privacy), delete one record and its raw text ("Why?" sheet), delete all local data. |
@@ -186,7 +186,7 @@ finsight-app/                  Gradle root
     src/commonMain/kotlin/com/finsight/
       domain/      Money, RawInput, Transaction, Category
       pipeline/    Gate, RegexExtractor, Integrity, RuleCategorizer, Pipeline
-      data/        Repository (in-memory), coverage
+      data/        Repository, Persistence (file store), coverage
       coach/       Tools, Insights (HealthScore, Pulse, WhatIf), Privacy, CoachAgent
       ai/          LocalLlm, CloudLlm interfaces
       ui/          App, AppState, designsystem/, screens/

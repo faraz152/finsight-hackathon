@@ -18,7 +18,7 @@ ADB=~/Library/Android/sdk/platform-tools/adb
 - [ ] **One correction made**: Transactions → open any merchant → pick a different category chip. It now shows the `You` badge. Leave one yellow record uncorrected for the live step.
 - [ ] **Test notification once** (command below) and confirm it appears. Then change the TID digits in the command for the real demo so it lands as a fresh row (same TID is merged as a duplicate).
 - [ ] **One hybrid question works on Wi-Fi/hotspot** (Health chip shows the `Hybrid` badge). Then Privacy → Cloud log → Clear, so the log on stage shows only the live call.
-- [ ] **Do not swipe FinSight away** from recents after this point. Storage is in memory: killing the app empties it.
+- [ ] Data is saved on the phone (app-private files), so it survives an app restart. To reset for a clean run: Privacy → Delete all local data, then Import again.
 - [ ] Battery above 60%, charger in the bag, Do Not Disturb ON (but keep the shell notification visible; test it), screen timeout 10 min, brightness up, font size default.
 - [ ] Hotspot on a second phone, already paired with the demo phone as a saved network.
 - [ ] **Backup recording** made after one clean run-through:
