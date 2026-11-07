@@ -62,7 +62,7 @@ Library: `com.google.ai.edge.litertlm:litertlm-android:0.8.0` (CPU backend). The
 5. Too slow (> ~3 s per call)? It runs in the background one transaction at a time, so the UI is unaffected; the demo still works rules-first.
 
 ## Gemini (optional, for Coach HYBRID/CLOUD)
-`finsight-app/local.properties`: `GEMINI_API_KEY=...` and optional `GEMINI_MODEL=gemini-flash-latest`. Rebuild. No key → on-device answers only (badge "On-device").
+`finsight-app/local.properties`: `GEMINI_API_KEY=...` and optional `GEMINI_MODEL=gemini-3.8-flash`. Rebuild. No key → on-device answers only (badge "On-device").
 
 ## Common failures
 - Plugin/dep resolution offline: drop `--offline`, needs network once.

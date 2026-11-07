@@ -132,7 +132,7 @@ The only permission requested is `INTERNET` (used by Coach only) plus the user-g
 | UI | Compose Multiplatform 1.7.1, Material 3, InvesTerra "Indigo Night" design tokens, Manrope font |
 | Build | AGP 8.7.3, Gradle 8.14, compileSdk 34, minSdk 26, JDK 21 (JVM target 11) |
 | Concurrency | kotlinx.coroutines 1.9.0, StateFlow |
-| Cloud AI | Gemini via the REST `generateContent` endpoint (`HttpURLConnection`, 6 s connect / 9 s timeout), default model `gemini-flash-latest` |
+| Cloud AI | Gemini via the REST `generateContent` endpoint (`HttpURLConnection`, 6 s connect / 9 s timeout), default model `gemini-3.8-flash` |
 | On-device AI | Gemma via LiteRT-LM: planned, behind the `LocalLlm` interface |
 | Libraries deliberately not used today | SQLDelight, Koin, Ktor (roadmap) |
 
