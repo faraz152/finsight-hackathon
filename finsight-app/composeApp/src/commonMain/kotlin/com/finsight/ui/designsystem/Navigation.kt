@@ -42,7 +42,8 @@ data class NavItem(val label: String, val glyph: String)
 
 /**
  * C-10 docked bar: 2 tabs · raised hexagon · 2 tabs. The raised band above the bar is transparent and lets touches
- * through; only the hexagon itself is tappable there.
+ * through; only the hexagon itself is tappable there. `selected = -1` (or any out-of-range index) highlights no tab,
+ * e.g. while a full-screen page such as Goals is open.
  */
 @Composable
 fun FsBottomBar(

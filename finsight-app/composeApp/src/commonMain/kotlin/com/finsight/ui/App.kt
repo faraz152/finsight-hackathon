@@ -15,49 +15,63 @@ enum class Tab(val label: String, val glyph: String) { HOME("Home", "◉"), TXNS
 @Composable
 fun App(state: AppState) {
     FsTheme {
-        var tab by remember { mutableStateOf(Tab.HOME) }
-        var actionsOpen by remember { mutableStateOf(false) }
-        var quickAddOpen by remember { mutableStateOf(false) }
-        var goalsOpen by remember { mutableStateOf(false) }
-
-        // FinSight functionality behind the InvesTerra hexagon.
-        val actions = listOf(
-            QuickAction("Add transaction", "Type it: \"chai 150 cash\"", "+", QuickActionTone.Gain) { actionsOpen = false; quickAddOpen = true },
-            QuickAction("Ask Coach", "Chat in English or Roman Urdu", "✦", QuickActionTone.Brand) { actionsOpen = false; tab = Tab.COACH },
-            QuickAction("Can I afford it?", "What If? simulator", "?", QuickActionTone.Warning) {
-                actionsOpen = false; state.coachDraft.value = "Can I afford PKR "; tab = Tab.COACH
-            },
-            QuickAction("Goals & bills", "Recurring payments and What If?", "◎", QuickActionTone.Info) {
-                actionsOpen = false; goalsOpen = true
-            },
-            QuickAction("Import messages", "Replay bank & wallet SMS", "↓", QuickActionTone.Info) {
-                actionsOpen = false; state.repo.importBatch(state.loadDemo()); tab = Tab.TXNS
-            },
-            QuickAction("Scan receipt", "Roadmap: on-device multimodal Gemma", "◎", QuickActionTone.Neutral, locked = true) {},
-        )
-
-        Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas)) {
-            Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding().padding(bottom = Sizes.navBarHeight + Edges.outline + Sizes.hexagonRaise)) {
-                if (goalsOpen) GoalsScreen(state) { goalsOpen = false }
-                else when (tab) {
-                    Tab.HOME -> HomeScreen(state) { tab = it }
-                    Tab.TXNS -> TransactionsScreen(state)
-                    Tab.COACH -> CoachScreen(state)
-                    Tab.PRIVACY -> PrivacyScreen(state)
-                }
-            }
-            QuickActionsOverlay(actionsOpen, actions) { actionsOpen = false }
-            FsBottomBar(
-                items = Tab.entries.map { NavItem(it.label, it.glyph) },
-                selected = Tab.entries.indexOf(tab),
-                onSelect = { actionsOpen = false; tab = Tab.entries[it] },
-                hexagonOpen = actionsOpen,
-                onHexagon = { actionsOpen = !actionsOpen },
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
+        val onboarded by state.onboarded.collectAsState()
+        // First launch: full-screen onboarding + prominent disclosure, no tabs or bottom bar.
+        if (onboarded) MainShell(state)
+        else Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas).statusBarsPadding().navigationBarsPadding()) {
+            OnboardingScreen(state)
         }
-        if (quickAddOpen) QuickAddSheet(state) { quickAddOpen = false }
     }
+}
+
+@Composable
+private fun MainShell(state: AppState) {
+    var tab by remember { mutableStateOf(Tab.HOME) }
+    var actionsOpen by remember { mutableStateOf(false) }
+    var quickAddOpen by remember { mutableStateOf(false) }
+    var goalsOpen by remember { mutableStateOf(false) }
+
+    // FinSight functionality behind the InvesTerra hexagon.
+    val actions = listOf(
+        QuickAction("Add transaction", "Type it: \"chai 150 cash\"", "+", QuickActionTone.Gain) { actionsOpen = false; quickAddOpen = true },
+        QuickAction("Ask Coach", "Chat in English or Roman Urdu", "✦", QuickActionTone.Brand) { actionsOpen = false; tab = Tab.COACH },
+        QuickAction("Can I afford it?", "What If? simulator", "?", QuickActionTone.Warning) {
+            actionsOpen = false; state.coachDraft.value = "Can I afford PKR "; tab = Tab.COACH
+        },
+        QuickAction("Goals & bills", "Recurring payments and What If?", "◎", QuickActionTone.Info) {
+            actionsOpen = false; goalsOpen = true
+        },
+        QuickAction("Import messages", "Replay bank & wallet SMS", "↓", QuickActionTone.Info) {
+            actionsOpen = false; state.repo.importBatch(state.loadDemo()); tab = Tab.TXNS
+        },
+        QuickAction("Scan receipt", "Roadmap: on-device multimodal Gemma", "◎", QuickActionTone.Neutral, locked = true) {},
+    )
+
+    // Android back: close the topmost layer (quick actions, then Goals) instead of leaving the app.
+    PlatformBackHandler(enabled = goalsOpen) { goalsOpen = false }
+    PlatformBackHandler(enabled = actionsOpen) { actionsOpen = false }
+
+    Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas)) {
+        Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding().padding(bottom = Sizes.navBarHeight + Edges.outline + Sizes.hexagonRaise)) {
+            if (goalsOpen) GoalsScreen(state) { goalsOpen = false }
+            else when (tab) {
+                Tab.HOME -> HomeScreen(state) { tab = it }
+                Tab.TXNS -> TransactionsScreen(state)
+                Tab.COACH -> CoachScreen(state)
+                Tab.PRIVACY -> PrivacyScreen(state)
+            }
+        }
+        QuickActionsOverlay(actionsOpen, actions) { actionsOpen = false }
+        FsBottomBar(
+            items = Tab.entries.map { NavItem(it.label, it.glyph) },
+            selected = if (goalsOpen) -1 else Tab.entries.indexOf(tab),
+            onSelect = { actionsOpen = false; goalsOpen = false; tab = Tab.entries[it] },
+            hexagonOpen = actionsOpen,
+            onHexagon = { actionsOpen = !actionsOpen },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+    if (quickAddOpen) QuickAddSheet(state) { quickAddOpen = false }
 }
 
 /** Confidence band → colour role. */
