@@ -1,5 +1,7 @@
 package com.finsight.coach
 
+import com.finsight.data.Codec
+import com.finsight.data.KeyValueStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -85,9 +87,11 @@ object NumberVerifier {
 
 data class CloudLogEntry(val time: Long, val route: String, val model: String, val payload: String, val latencyMs: Long, val status: String)
 
-class CoachLog {
-    private val _entries = MutableStateFlow<List<CloudLogEntry>>(emptyList())
+class CoachLog(private val store: KeyValueStore? = null) {
+    private val _entries = MutableStateFlow(store?.read(STORE_KEY)?.let { runCatching { Codec.decodeLog(it) }.getOrNull() } ?: emptyList())
     val entries: StateFlow<List<CloudLogEntry>> = _entries.asStateFlow()
-    fun add(e: CloudLogEntry) = _entries.update { listOf(e) + it }
-    fun clear() { _entries.value = emptyList() }
+    fun add(e: CloudLogEntry) { _entries.update { listOf(e) + it }; save() }
+    fun clear() { _entries.value = emptyList(); save() }
+    private fun save() { store?.let { s -> runCatching { s.write(STORE_KEY, Codec.encodeLog(_entries.value)) } } }
+    companion object { const val STORE_KEY = "coach_log" }
 }

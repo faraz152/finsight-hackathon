@@ -5,7 +5,10 @@ import com.finsight.coach.*
 import com.finsight.data.Repository
 import com.finsight.domain.Channel
 import com.finsight.domain.RawInput
+import com.finsight.data.KeyValueStore
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.drop
 
 /** Manual DI for the hackathon (Koin is roadmap). */
 class AppState(
@@ -15,12 +18,17 @@ class AppState(
     val openNotificationSettings: () -> Unit,
     val hasNotificationAccess: () -> Boolean,
     val loadDemo: () -> List<RawInput>,
+    val store: KeyValueStore? = null,
 ) {
-    val repo = Repository()
+    val repo = Repository(store)
     val tools = Tools({ repo.transactions.value }, now)
-    val log = CoachLog()
-    val cloudEnabled = MutableStateFlow(true)
-    val profile = MutableStateFlow(Profile.SALARIED)
+    val log = CoachLog(store)
+    val cloudEnabled = MutableStateFlow(store?.read("cloud_enabled")?.toBooleanStrictOrNull() ?: true)
+    val profile = MutableStateFlow(store?.read("profile")?.let { p -> Profile.entries.firstOrNull { it.name == p } } ?: Profile.SALARIED)
+    init { if (store != null) CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+        launch { cloudEnabled.drop(1).collect { store.write("cloud_enabled", it.toString()) } }
+        launch { profile.drop(1).collect { store.write("profile", it.name) } }
+    } }
     /** Text to pre-fill (or auto-send) in Coach, set by the centre quick actions. */
     val coachDraft = MutableStateFlow<String?>(null)
     val coach = CoachAgent(repo, tools, cloud, log, isOnline, { cloudEnabled.value }, { profile.value }, now)

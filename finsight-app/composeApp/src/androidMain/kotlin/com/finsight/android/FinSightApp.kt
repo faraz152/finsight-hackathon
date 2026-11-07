@@ -29,6 +29,7 @@ class FinSightApp : Application() {
             },
             hasNotificationAccess = ::hasNotificationAccess,
             loadDemo = ::loadDemo,
+            store = FileStore(this),
         )
     }
 

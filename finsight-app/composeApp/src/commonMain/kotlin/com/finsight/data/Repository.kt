@@ -12,8 +12,8 @@ data class ImportStats(val accepted: Int = 0, val autoAccepted: Int = 0, val rev
 
 data class Coverage(val percent: Int?, val basis: String)
 
-/** In-memory store for the hackathon (SQLDelight is roadmap). */
-class Repository {
+/** In-memory store for the hackathon (SQLDelight is roadmap); optionally persisted to [store] after every mutation. */
+class Repository(private val store: KeyValueStore? = null) {
     private val _txns = MutableStateFlow<List<Transaction>>(emptyList())
     val transactions: StateFlow<List<Transaction>> = _txns.asStateFlow()
     private val _memory = MutableStateFlow<Map<String, Category>>(emptyMap())
@@ -26,6 +26,29 @@ class Repository {
 
     val pipeline = Pipeline(memory = { _memory.value }, ownAccounts = { ownAccounts })
 
+    private var batching = false
+
+    init { store?.read(STORE_KEY)?.let { restore(it) } }
+
+    /** Serialized copy of all repository data (see [Codec]). */
+    fun snapshot(): String = Codec.encodeRepo(RepoSnapshot(_txns.value, _memory.value, _scams.value, _lastImport.value))
+
+    /** Replace all data with a [snapshot]; keeps pipeline ids unique after restore. */
+    fun restore(text: String) {
+        val s = Codec.decodeRepo(text)
+        _txns.value = s.transactions.sortedByDescending { it.timestamp }
+        _memory.value = s.memory
+        _scams.value = s.scams
+        _lastImport.value = s.lastImport
+        pipeline.nextId = maxOf(pipeline.nextId, (s.transactions.maxOfOrNull { it.id } ?: 0L) + 1)
+    }
+
+    private fun save() {
+        val s = store ?: return
+        if (batching) return
+        runCatching { s.write(STORE_KEY, snapshot()) }
+    }
+
     fun ingest(input: RawInput): PipelineResult {
         val r = pipeline.process(input)
         when (r) {
@@ -33,6 +56,7 @@ class Repository {
             is PipelineResult.ScamWarning -> _scams.update { listOf(r.text) + it }
             is PipelineResult.Dropped -> {}
         }
+        if (r !is PipelineResult.Dropped) save()
         return r
     }
 
@@ -54,7 +78,8 @@ class Repository {
 
     fun importBatch(inputs: List<RawInput>): ImportStats {
         var s = ImportStats()
-        inputs.forEach { input ->
+        batching = true
+        try { inputs.forEach { input ->
             val before = _txns.value.size
             when (val r = ingest(input)) {
                 is PipelineResult.Accepted -> s = if (_txns.value.size == before) s.copy(duplicates = s.duplicates + 1)
@@ -62,8 +87,9 @@ class Repository {
                 is PipelineResult.Dropped -> s = s.copy(dropped = s.dropped + 1)
                 is PipelineResult.ScamWarning -> s = s.copy(scams = s.scams + 1)
             }
-        }
+        } } finally { batching = false }
         _lastImport.value = s
+        save()
         return s
     }
 
@@ -79,10 +105,11 @@ class Repository {
                 else it
             }
         }
+        save()
     }
 
-    fun delete(id: Long) = _txns.update { l -> l.filterNot { it.id == id } }
-    fun clearAll() { _txns.value = emptyList(); _memory.value = emptyMap(); _scams.value = emptyList(); _lastImport.value = null }
+    fun delete(id: Long) { _txns.update { l -> l.filterNot { it.id == id } }; save() }
+    fun clearAll() { _txns.value = emptyList(); _memory.value = emptyMap(); _scams.value = emptyList(); _lastImport.value = null; save() }
 
     /**
      * Data coverage (plan 6.2): computed, never invented.
@@ -106,4 +133,6 @@ class Repository {
         val span = ((all.maxOf { it.timestamp } - all.minOf { it.timestamp }) / 86_400_000 + 1).toInt()
         return Coverage((days * 100 / span).coerceIn(0, 100), "Activity on $days of $span days; cash and apps without notifications may be missing")
     }
+
+    companion object { const val STORE_KEY = "repository" }
 }

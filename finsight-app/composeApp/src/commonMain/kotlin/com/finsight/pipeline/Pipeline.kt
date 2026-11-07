@@ -13,7 +13,8 @@ class Pipeline(
     private val memory: () -> Map<String, Category>,
     private val ownAccounts: () -> Set<String>,
 ) {
-    private var nextId = 1L
+    /** Public so Repository.restore can keep ids unique after a restart. */
+    var nextId = 1L
     private val quickAdd = Regex("""^\s*([A-Za-z][A-Za-z .'&-]*?)\s+([0-9][0-9,]*(?:\.[0-9]{1,2})?)\s*(cash|card|jazzcash|easypaisa|bank)?\s*$""", RegexOption.IGNORE_CASE)
 
     fun process(input: RawInput): PipelineResult {
