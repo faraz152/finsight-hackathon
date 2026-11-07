@@ -7,7 +7,7 @@
 - [x] Gradle scaffold `finsight-app/` (Kotlin 2.0.21, CMP 1.7.1, AGP 8.7.3, Android target only)
 - [x] Copy `sms_test_templates.json` into `androidMain/assets`
 - [x] `./gradlew :composeApp:assembleDebug` green
-- [ ] Phone or emulator visible in `adb devices`
-- [ ] (C) Gemini API key in `finsight-app/local.properties` (optional; app works without)
+- [x] Phone or emulator visible in `adb devices`
+- [x] Cloud AI key: Google key blocked (project cannot generate); Gemma 4 via OpenRouter works (`OPENROUTER_API_KEY`)
 
 **Exit:** empty app builds.
