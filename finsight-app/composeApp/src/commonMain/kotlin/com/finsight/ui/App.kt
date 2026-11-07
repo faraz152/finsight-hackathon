@@ -53,12 +53,17 @@ private fun MainShell(state: AppState) {
 
     Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas)) {
         Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding().padding(bottom = Sizes.navBarHeight + Edges.outline + Sizes.hexagonRaise)) {
-            if (goalsOpen) GoalsScreen(state) { goalsOpen = false }
-            else when (tab) {
-                Tab.HOME -> HomeScreen(state) { tab = it }
-                Tab.TXNS -> TransactionsScreen(state)
-                Tab.COACH -> CoachScreen(state)
-                Tab.PRIVACY -> PrivacyScreen(state)
+            Column(Modifier.fillMaxSize()) {
+                AiModeBar(state)
+                Box(Modifier.weight(1f)) {
+                    if (goalsOpen) GoalsScreen(state) { goalsOpen = false }
+                    else when (tab) {
+                        Tab.HOME -> HomeScreen(state) { tab = it }
+                        Tab.TXNS -> TransactionsScreen(state)
+                        Tab.COACH -> CoachScreen(state)
+                        Tab.PRIVACY -> PrivacyScreen(state)
+                    }
+                }
             }
         }
         QuickActionsOverlay(actionsOpen, actions) { actionsOpen = false }

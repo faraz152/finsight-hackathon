@@ -264,3 +264,33 @@ fun FsTextField(value: String, onValueChange: (String) -> Unit, placeholder: Str
         ),
     )
 }
+
+/**
+ * InvesTerra segmented control (recessed track, brand thumb with control edge). Used for the global AI mode switch.
+ * [options] are (label, caption) pairs; [selected] is the index.
+ */
+@Composable
+fun FsSegmented(options: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier.clip(RoundedCornerShape(Radius.control)).background(FsColors.role.fill.cardInset)
+            .padding(Spacing.s1),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s1),
+    ) {
+        options.forEachIndexed { i, label ->
+            val on = i == selected
+            EdgeSurface(
+                Modifier.weight(1f).height(Sizes.buttonHeightSmall - Spacing.s1),
+                fill = if (on) FsColors.brandFill else FsColors.role.fill.cardInset,
+                edgeColor = if (on) FsColors.role.edge.buttonPrimary else FsColors.role.fill.cardInset,
+                edge = if (on) EdgeStyle.Control else EdgeStyle.Outline,
+                shape = RoundedCornerShape(Radius.segmented),
+                onClick = { onSelect(i) },
+                contentPadding = PaddingValues(horizontal = Spacing.s2),
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(label, style = FsTheme.type.text.labelMedium, color = if (on) FsColors.brandOnFill else FsColors.role.content.secondary, maxLines = 1)
+                }
+            }
+        }
+    }
+}
