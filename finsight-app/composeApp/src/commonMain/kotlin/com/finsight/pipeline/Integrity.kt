@@ -14,7 +14,12 @@ object Integrity {
     private val transferIn = Regex("""(received from|transfer(red)? from|ibft from|raast from|via (raast|ibft)|received via)""", RegexOption.IGNORE_CASE)
     private val salary = Regex("""(salary|payroll)""", RegexOption.IGNORE_CASE)
 
-    data class Classification(val kind: TxnKind, val status: TxnStatus, val reasons: List<String>)
+    data class Classification(val kind: TxnKind, val status: TxnStatus, val reasons: List<String>, val ownTransfer: Boolean = false)
+
+    /** Destination account digits: a masked number after "to"/"into" (never the "from" source account). */
+    private val counterpartyRx = Regex("""\b(?:to|into)\s+(?:(?!\bfrom\b|\busing\b)[^.\n]){0,50}?[*xX]{2,}\s*([0-9]{4})\b""", RegexOption.IGNORE_CASE)
+
+    fun counterpartyLast4(text: String): String? = counterpartyRx.find(text)?.groupValues?.get(1)
 
     fun classify(text: String, type: TxnType, ownAccounts: Set<String>, counterpartyLast4: String?): Classification {
         val r = mutableListOf<String>()
@@ -23,19 +28,20 @@ object Integrity {
             pending.containsMatchIn(text) -> TxnStatus.PENDING.also { r += "Marked pending (\"${pending.find(text)!!.value}\")" }
             else -> TxnStatus.POSTED
         }
+        var own = false
         val kind = when {
             reversal.containsMatchIn(text) -> TxnKind.REVERSAL.also { r += "Reversal wording: excluded from spend and income" }
             refund.containsMatchIn(text) && type == TxnType.CREDIT -> TxnKind.REFUND.also { r += "Refund: not counted as income" }
             fee.containsMatchIn(text) && type == TxnType.DEBIT -> TxnKind.FEE.also { r += "Bank fee / tax" }
             type == TxnType.DEBIT && counterpartyLast4 != null && counterpartyLast4 in ownAccounts ->
-                TxnKind.TRANSFER_OUT.also { r += "Transfer to your own account ••$counterpartyLast4" }
+                TxnKind.TRANSFER_OUT.also { own = true; r += "Transfer to your own account ••$counterpartyLast4: not spending" }
             type == TxnType.CREDIT && salary.containsMatchIn(text) -> TxnKind.INCOME.also { r += "Salary credit" }
             type == TxnType.CREDIT && transferIn.containsMatchIn(text) -> TxnKind.INCOME.also { r += "Incoming transfer (Raast / IBFT / wallet) counted as income" }
             type == TxnType.DEBIT && transferOut.containsMatchIn(text) -> TxnKind.TRANSFER_OUT.also { r += "Outgoing transfer" }
             type == TxnType.CREDIT -> TxnKind.INCOME
             else -> TxnKind.EXPENSE
         }
-        return Classification(kind, status, r)
+        return Classification(kind, status, r, own)
     }
 
     /** Same payment seen twice (SMS + app notification) must produce the same fingerprint. */

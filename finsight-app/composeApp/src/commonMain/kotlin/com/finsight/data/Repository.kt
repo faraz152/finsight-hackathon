@@ -22,16 +22,22 @@ class Repository(private val store: KeyValueStore? = null) {
     val scams: StateFlow<List<String>> = _scams.asStateFlow()
     private val _lastImport = MutableStateFlow<ImportStats?>(null)
     val lastImport: StateFlow<ImportStats?> = _lastImport.asStateFlow()
+    /** Extra own-account digits (tests / manual); accounts marked "Mine" are always included. */
     val ownAccounts = mutableSetOf<String>()
+    private val _accounts = MutableStateFlow<List<Account>>(emptyList())
+    val accounts: StateFlow<List<Account>> = _accounts.asStateFlow()
 
-    val pipeline = Pipeline(memory = { _memory.value }, ownAccounts = { ownAccounts })
+    /** Last 4 digits of every account the user marked as theirs (feeds self-transfer detection in Integrity). */
+    fun ownLast4(): Set<String> = ownAccounts + _accounts.value.filter { it.isMine }.mapNotNull { it.last4 }
+
+    val pipeline = Pipeline(memory = { _memory.value }, ownAccounts = { ownLast4() })
 
     private var batching = false
 
     init { store?.read(STORE_KEY)?.let { restore(it) } }
 
     /** Serialized copy of all repository data (see [Codec]). */
-    fun snapshot(): String = Codec.encodeRepo(RepoSnapshot(_txns.value, _memory.value, _scams.value, _lastImport.value))
+    fun snapshot(): String = Codec.encodeRepo(RepoSnapshot(_txns.value, _memory.value, _scams.value, _lastImport.value, _accounts.value))
 
     /** Replace all data with a [snapshot]; keeps pipeline ids unique after restore. */
     fun restore(text: String) {
@@ -40,6 +46,7 @@ class Repository(private val store: KeyValueStore? = null) {
         _memory.value = s.memory
         _scams.value = s.scams
         _lastImport.value = s.lastImport
+        _accounts.value = s.accounts
         pipeline.nextId = maxOf(pipeline.nextId, (s.transactions.maxOfOrNull { it.id } ?: 0L) + 1)
     }
 
@@ -52,7 +59,7 @@ class Repository(private val store: KeyValueStore? = null) {
     fun ingest(input: RawInput): PipelineResult {
         val r = pipeline.process(input)
         when (r) {
-            is PipelineResult.Accepted -> add(r.txn)
+            is PipelineResult.Accepted -> add(withAccount(r.txn, input))
             is PipelineResult.ScamWarning -> _scams.update { listOf(r.text) + it }
             is PipelineResult.Dropped -> {}
         }
@@ -74,6 +81,55 @@ class Repository(private val store: KeyValueStore? = null) {
             } else (list + t).sortedByDescending { it.timestamp }
         }
         return !dup
+    }
+
+    /** Resolve (or create) the account for [t], keep its latest balance, and tag the record. */
+    private fun withAccount(t: Transaction, input: RawInput): Transaction {
+        val res = AccountResolver.resolve(_accounts.value, input, t.accountLast4, t.timestamp) ?: return t
+        var acct = res.account
+        val bal = t.balance
+        if (bal != null && bal.currency == acct.currency && (acct.balanceAt == null || t.timestamp >= acct.balanceAt!!))
+            acct = acct.copy(balanceMinor = bal.minor, balanceAt = t.timestamp)
+        _accounts.update { list -> if (res.created) list + acct else list.map { if (it.id == acct.id) acct else it } }
+        return t.copy(accountId = acct.id, explanation = t.explanation + "Account: ${acct.displayName} (${res.reason})")
+    }
+
+    fun account(id: String?): Account? = id?.let { i -> _accounts.value.firstOrNull { it.id == i } }
+
+    /** Records per account id (for the Accounts screen). */
+    fun transactionCounts(): Map<String, Int> = _txns.value.mapNotNull { it.accountId }.groupingBy { it }.eachCount()
+
+    fun renameAccount(id: String, nickname: String) {
+        _accounts.update { l -> l.map { if (it.id == id) it.copy(nickname = nickname.trim().ifBlank { null }) else it } }; save()
+    }
+
+    fun setMine(id: String, mine: Boolean) {
+        _accounts.update { l -> l.map { if (it.id == id) it.copy(isMine = mine) else it } }; save()
+    }
+
+    /** Merge [fromId] into [intoId]: its transactions move over, the newer balance wins, [fromId] disappears. */
+    fun mergeAccounts(fromId: String, intoId: String) {
+        if (fromId == intoId) return
+        val from = account(fromId) ?: return
+        val into = account(intoId) ?: return
+        val newer = if ((from.balanceAt ?: Long.MIN_VALUE) > (into.balanceAt ?: Long.MIN_VALUE)) from else into
+        val merged = into.copy(last4 = into.last4 ?: from.last4, balanceMinor = newer.balanceMinor, balanceAt = newer.balanceAt)
+        _accounts.update { l -> l.filterNot { it.id == fromId }.map { if (it.id == intoId) merged else it } }
+        _txns.update { l -> l.map { if (it.accountId == fromId) it.copy(accountId = intoId) else it } }
+        save()
+    }
+
+    /** Remove the account only; its transactions stay (unassigned). */
+    fun deleteAccount(id: String) {
+        _accounts.update { l -> l.filterNot { it.id == id } }
+        _txns.update { l -> l.map { if (it.accountId == id) it.copy(accountId = null) else it } }
+        save()
+    }
+
+    fun addCashAccount(now: Long = _txns.value.maxOfOrNull { it.timestamp } ?: 0L): Account {
+        val a = AccountResolver.cash(_accounts.value, now)
+        _accounts.update { it + a }; save()
+        return a
     }
 
     fun importBatch(inputs: List<RawInput>): ImportStats {
@@ -121,7 +177,7 @@ class Repository(private val store: KeyValueStore? = null) {
     }
 
     fun delete(id: Long) { _txns.update { l -> l.filterNot { it.id == id } }; save() }
-    fun clearAll() { _txns.value = emptyList(); _memory.value = emptyMap(); _scams.value = emptyList(); _lastImport.value = null; save() }
+    fun clearAll() { _txns.value = emptyList(); _memory.value = emptyMap(); _scams.value = emptyList(); _lastImport.value = null; _accounts.value = emptyList(); save() }
 
     /**
      * Data coverage (plan 6.2): computed, never invented.

@@ -60,7 +60,8 @@ fun TransactionsScreen(state: AppState) {
     }
     val sel = txns.firstOrNull { it.id == open }
     if (sel != null) ModalBottomSheet(onDismissRequest = { open = null }, containerColor = FsColors.role.fill.sheet, scrimColor = FsColors.scrim) {
-        WhySheet(sel, onCorrect = { c -> state.repo.correct(sel.id, c) }, onDelete = { state.repo.delete(sel.id); open = null })
+        WhySheet(sel, onCorrect = { c -> state.repo.correct(sel.id, c) }, onDelete = { state.repo.delete(sel.id); open = null },
+            accountName = state.repo.account(sel.accountId)?.displayName)
     }
 }
 
@@ -124,7 +125,7 @@ fun sourceBadge(t: Transaction) = when (t.categorySource) {
 }
 
 @Composable
-fun WhySheet(t: Transaction, onCorrect: (Category) -> Unit, onDelete: () -> Unit) {
+fun WhySheet(t: Transaction, onCorrect: (Category) -> Unit, onDelete: () -> Unit, accountName: String? = null) {
     val type = FsTheme.type
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(Spacing.sheetPadding), verticalArrangement = Arrangement.spacedBy(Spacing.s2)) {
         Text("Why?", style = type.text.titleLarge, color = FsColors.role.content.primary)
@@ -135,7 +136,7 @@ fun WhySheet(t: Transaction, onCorrect: (Category) -> Unit, onDelete: () -> Unit
         }
         KeyValueRow("Amount", t.amount.toString(), if (t.type == TxnType.CREDIT) FsColors.role.change.upContent else FsColors.role.content.primary)
         KeyValueRow("Type", "${t.type.name.lowercase()} · ${t.kind.name.lowercase().replace('_', ' ')}")
-        t.accountLast4?.let { KeyValueRow("Account", "••$it") }
+        (accountName ?: t.accountLast4?.let { "••$it" })?.let { KeyValueRow("Account", it) }
         t.balance?.let { KeyValueRow("Balance after", it.toString()) }
         SectionHeader("Checks", Modifier.padding(top = Spacing.s2))
         t.explanation.forEach { Text("✓ $it", style = type.text.bodyMedium, color = FsColors.role.content.primary) }

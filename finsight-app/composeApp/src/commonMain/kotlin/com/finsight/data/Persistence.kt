@@ -21,6 +21,7 @@ data class RepoSnapshot(
     val memory: Map<String, Category>,
     val scams: List<String>,
     val lastImport: ImportStats?,
+    val accounts: List<Account> = emptyList(),
 )
 
 /**
@@ -74,6 +75,10 @@ object Codec {
         s.transactions.forEach { appendLine(encodeTxn(it)) }
         s.memory.forEach { (k, v) -> appendLine(line("M", k, v.name)) }
         s.scams.forEach { appendLine(line("S", it)) }
+        s.accounts.forEach { a ->
+            appendLine(line("A", a.id, a.institution, a.type.name, a.last4, a.nickname, a.isMine.toString(),
+                a.balanceMinor?.toString(), a.balanceAt?.toString(), a.currency, "${a.createdAt}"))
+        }
         s.lastImport?.let { appendLine(line("I", "${it.accepted}", "${it.autoAccepted}", "${it.review}", "${it.duplicates}", "${it.dropped}", "${it.scams}")) }
     }
 
@@ -82,6 +87,7 @@ object Codec {
         val memory = LinkedHashMap<String, Category>()
         val scams = mutableListOf<String>()
         var last: ImportStats? = null
+        val accounts = mutableListOf<Account>()
         text.lineSequence().filter { it.isNotEmpty() }.forEach { raw ->
             runCatching {
                 val f = fields(raw)
@@ -89,11 +95,13 @@ object Codec {
                     "T" -> txns += decodeTxn(f)
                     "M" -> memory[f[1]!!] = Category.valueOf(f[2]!!)
                     "S" -> scams += f[1]!!
+                    "A" -> accounts += Account(f[1]!!, f[2]!!, AccountType.valueOf(f[3]!!), f[4], f[5], f[6]!!.toBoolean(),
+                        f[7]?.toLong(), f[8]?.toLong(), f[9] ?: "PKR", f[10]!!.toLong())
                     "I" -> { val n = f.drop(1).map { it!!.toInt() }; last = ImportStats(n[0], n[1], n[2], n[3], n[4], n[5]) }
                 }
             }
         }
-        return RepoSnapshot(txns, memory, scams, last)
+        return RepoSnapshot(txns, memory, scams, last, accounts)
     }
 
     private fun encodeTxn(t: Transaction): String = line(
@@ -101,11 +109,17 @@ object Codec {
         t.merchant, t.merchantKey, t.accountLast4, t.balance?.minor?.toString(), t.balance?.currency,
         t.category.name, t.confidence.toString(), t.categorySource.name, t.parseSource.name, t.channel.name,
         t.sourceApp, t.needsReview.toString(), t.rawText, "${t.timestamp}", t.fingerprint, "${t.evidenceCount}",
+        // v2 fields go BEFORE the trailing explanation list, behind a marker so old lines still decode.
+        TXN_V2, t.accountId, t.ownTransfer.toString(),
         *t.explanation.toTypedArray(),
     )
 
+    /** Marker field at index 23; lines written before accounts existed go straight to the explanation list. */
+    private const val TXN_V2 = "#v2"
+
     private fun decodeTxn(f: List<String?>): Transaction {
         val balMinor = f[10]?.toLong()
+        val v2 = f.getOrNull(23) == TXN_V2
         return Transaction(
             id = f[1]!!.toLong(), amount = Money(f[2]!!.toLong(), f[3]!!), type = TxnType.valueOf(f[4]!!),
             kind = TxnKind.valueOf(f[5]!!), status = TxnStatus.valueOf(f[6]!!),
@@ -115,7 +129,8 @@ object Codec {
             categorySource = CategorySource.valueOf(f[14]!!), parseSource = ParseSource.valueOf(f[15]!!),
             channel = Channel.valueOf(f[16]!!), sourceApp = f[17]!!, needsReview = f[18]!!.toBoolean(),
             rawText = f[19]!!, timestamp = f[20]!!.toLong(), fingerprint = f[21]!!, evidenceCount = f[22]!!.toInt(),
-            explanation = f.drop(23).map { it ?: "" },
+            explanation = f.drop(if (v2) 26 else 23).map { it ?: "" },
+            accountId = if (v2) f[24] else null, ownTransfer = v2 && f[25]!!.toBoolean(),
         )
     }
 

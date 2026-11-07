@@ -8,7 +8,11 @@ data class CategorySpend(val category: Category, val minor: Long, val percent: I
 data class Period(val label: String, val from: Long, val to: Long)
 
 /** Fixed Kotlin "SQL" tools: the only source of numbers for Coach. */
-class Tools(private val txns: () -> List<Transaction>, private val now: () -> Long) {
+class Tools(
+    private val txns: () -> List<Transaction>,
+    private val now: () -> Long,
+    private val accounts: () -> List<Account> = { emptyList() },
+) {
 
     fun period(key: String): Period {
         val n = now()
@@ -56,8 +60,18 @@ class Tools(private val txns: () -> List<Transaction>, private val now: () -> Lo
             .map { (k, l) -> Recurring(l.first().merchant ?: k, l.first().category, l.sumOf { it.amount.minor } / l.size, dayOfMonth(l.first().timestamp), l.size) }
             .sortedByDescending { it.avgMinor }
 
-    /** Sum of the latest known balance per account (accounts without a balance in messages are unknown, not zero). */
-    fun latestBalance(): Long? = txns().filter { it.balance != null && it.balance.currency == "PKR" }
+    /**
+     * Sum of the latest known balance of the user's own accounts ("Mine"); accounts without a balance are unknown, not zero.
+     * Falls back to grouping raw records by last 4 / app when no accounts exist yet.
+     */
+    fun latestBalance(): Long? {
+        val accts = accounts()
+        if (accts.isNotEmpty()) return accts.filter { it.isMine && it.balanceMinor != null && it.currency == "PKR" }
+            .takeIf { it.isNotEmpty() }?.sumOf { it.balanceMinor!! }
+        return latestBalanceFromRecords()
+    }
+
+    private fun latestBalanceFromRecords(): Long? = txns().filter { it.balance != null && it.balance.currency == "PKR" }
         .groupBy { it.accountLast4 ?: it.sourceApp }.values.map { l -> l.maxByOrNull { it.timestamp }!!.balance!!.minor }
         .takeIf { it.isNotEmpty() }?.sum()
 

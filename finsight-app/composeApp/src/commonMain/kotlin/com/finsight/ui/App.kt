@@ -30,6 +30,7 @@ private fun MainShell(state: AppState) {
     var actionsOpen by remember { mutableStateOf(false) }
     var quickAddOpen by remember { mutableStateOf(false) }
     var goalsOpen by remember { mutableStateOf(false) }
+    var accountsOpen by remember { mutableStateOf(false) }
 
     // FinSight functionality behind the InvesTerra hexagon.
     val actions = listOf(
@@ -39,7 +40,10 @@ private fun MainShell(state: AppState) {
             actionsOpen = false; state.coachDraft.value = "Can I afford PKR "; tab = Tab.COACH
         },
         QuickAction("Goals & bills", "Recurring payments and What If?", "◎", QuickActionTone.Info) {
-            actionsOpen = false; goalsOpen = true
+            actionsOpen = false; accountsOpen = false; goalsOpen = true
+        },
+        QuickAction("Accounts", "Banks, wallets, cards & balances", "▣", QuickActionTone.Brand) {
+            actionsOpen = false; goalsOpen = false; accountsOpen = true
         },
         QuickAction("Import messages", "Replay bank & wallet SMS", "↓", QuickActionTone.Info) {
             actionsOpen = false; state.repo.importBatch(state.loadDemo()); tab = Tab.TXNS
@@ -49,6 +53,7 @@ private fun MainShell(state: AppState) {
 
     // Android back: close the topmost layer (quick actions, then Goals) instead of leaving the app.
     PlatformBackHandler(enabled = goalsOpen) { goalsOpen = false }
+    PlatformBackHandler(enabled = accountsOpen) { accountsOpen = false }
     PlatformBackHandler(enabled = actionsOpen) { actionsOpen = false }
 
     Box(Modifier.fillMaxSize().background(FsColors.role.fill.canvas)) {
@@ -56,7 +61,8 @@ private fun MainShell(state: AppState) {
             Column(Modifier.fillMaxSize()) {
                 AiModeBar(state)
                 Box(Modifier.weight(1f)) {
-                    if (goalsOpen) GoalsScreen(state) { goalsOpen = false }
+                    if (accountsOpen) AccountsScreen(state) { accountsOpen = false }
+                    else if (goalsOpen) GoalsScreen(state) { goalsOpen = false }
                     else when (tab) {
                         Tab.HOME -> HomeScreen(state) { tab = it }
                         Tab.TXNS -> TransactionsScreen(state)
@@ -69,8 +75,8 @@ private fun MainShell(state: AppState) {
         QuickActionsOverlay(actionsOpen, actions) { actionsOpen = false }
         FsBottomBar(
             items = Tab.entries.map { NavItem(it.label, it.glyph) },
-            selected = if (goalsOpen) -1 else Tab.entries.indexOf(tab),
-            onSelect = { actionsOpen = false; goalsOpen = false; tab = Tab.entries[it] },
+            selected = if (goalsOpen || accountsOpen) -1 else Tab.entries.indexOf(tab),
+            onSelect = { actionsOpen = false; goalsOpen = false; accountsOpen = false; tab = Tab.entries[it] },
             hexagonOpen = actionsOpen,
             onHexagon = { actionsOpen = !actionsOpen },
             modifier = Modifier.align(Alignment.BottomCenter),
