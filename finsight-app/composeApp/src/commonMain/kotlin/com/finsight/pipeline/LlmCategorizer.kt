@@ -73,7 +73,10 @@ class LlmCategorizer(private val llm: LocalLlm) {
             "internet" to Category.MOBILE, "telecom" to Category.MOBILE, "grocery" to Category.GROCERIES,
             "fees" to Category.FINANCIAL, "fee" to Category.FINANCIAL, "rent" to Category.HOUSING,
             "restaurant" to Category.FOOD, "dining" to Category.FOOD, "salary" to Category.INCOME,
-            "medical" to Category.HEALTH, "travel" to Category.TRANSPORT, "kameti" to Category.COMMITTEE,
+            "medical" to Category.HEALTH, "travel" to Category.TRAVEL, "kameti" to Category.COMMITTEE,
+            "personal" to Category.PERSONAL_CARE, "charity" to Category.CHARITY, "zakat" to Category.CHARITY,
+            "donation" to Category.CHARITY, "tax" to Category.TAXES, "government" to Category.TAXES,
+            "investment" to Category.INVESTMENT, "savings" to Category.INVESTMENT,
         )
 
         /** Defensive: trim, accept a JSON object's "category", else the first word; must be in the allowed list. */
