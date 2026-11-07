@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.finsight.domain.Channel
@@ -12,11 +13,30 @@ import com.finsight.pipeline.PipelineResult
 import com.finsight.ui.App
 
 class MainActivity : ComponentActivity() {
+    /** Test Lab action waiting for the POST_NOTIFICATIONS answer. */
+    private var pendingOnGranted: (() -> Unit)? = null
+    private val postPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val action = pendingOnGranted
+        pendingOnGranted = null
+        if (granted) action?.invoke()
+        else Toast.makeText(this, "Test Lab needs notification permission to post test bank alerts.", Toast.LENGTH_LONG).show()
+    }
+    private val requester: (() -> Unit) -> Unit = { action ->
+        pendingOnGranted = action
+        postPermission.launch(TestNotifier.POST_NOTIFICATIONS)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        FinSightApp.instance.postPermissionRequester = requester
         handleShare(intent)
         setContent { App(FinSightApp.instance.state) }
+    }
+
+    override fun onDestroy() {
+        if (FinSightApp.instance.postPermissionRequester === requester) FinSightApp.instance.postPermissionRequester = null
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {

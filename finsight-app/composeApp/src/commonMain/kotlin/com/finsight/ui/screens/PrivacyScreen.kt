@@ -1,5 +1,6 @@
 package com.finsight.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,6 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.finsight.data.TestSamples
+import com.finsight.domain.Channel
+import com.finsight.domain.TxnType
+import com.finsight.domain.formatPkr
 import com.finsight.ui.AppState
 import com.finsight.ui.designsystem.*
 
@@ -30,6 +35,7 @@ fun PrivacyScreen(state: AppState) {
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = Spacing.gutter), verticalArrangement = Arrangement.spacedBy(Spacing.rowGapVertical)) {
         ScreenHeader("Privacy Center", "See and control exactly what FinSight uses")
+        TestLabCard(state, access) { access = state.hasNotificationAccess() }
         FsCard {
             SectionHeader("What FinSight reads")
             Text("Only transaction notifications from SMS apps and the wallet apps you allow (JazzCash, Easypaisa). Everything else is ignored in memory and never stored. FinSight never reads your SMS inbox (no READ_SMS permission).",
@@ -92,5 +98,76 @@ fun PrivacyScreen(state: AppState) {
             FsButton("Delete all local data", { state.repo.clearAll(); state.log.clear() }, Modifier.fillMaxWidth(), variant = FsButtonVariant.Destructive)
         }
         Spacer(Modifier.height(Spacing.s6))
+    }
+}
+
+/** Test Lab: fires REAL bank-style notifications on this phone and shows what the capture pipeline made of them. */
+@Composable
+private fun TestLabCard(state: AppState, access: Boolean, refreshAccess: () -> Unit) {
+    val txns by state.repo.transactions.collectAsState()
+    val scams by state.repo.scams.collectAsState()
+    var sent by remember { mutableStateOf<String?>(null) }
+    val type = FsTheme.type
+    val captured = txns.filter { it.channel == Channel.NOTIFICATION }.sortedByDescending { it.timestamp }.take(5)
+
+    FsCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionHeader("Test Lab", Modifier.weight(1f))
+            FsTag(if (access) "Capture: ON" else "Capture: OFF", if (access) TagTone.Success else TagTone.Warning)
+        }
+        Text("Fires real bank-style notifications on this phone; FinSight captures them like real alerts. Each send uses a fresh TID and the current time.",
+            style = type.text.bodyMedium, color = FsColors.role.content.secondary)
+        if (!access) {
+            Spacer(Modifier.height(Spacing.s3))
+            FsCard(tone = NoticeTone.Warning) {
+                Text("Notification access is OFF, so test alerts will appear but will not be captured.",
+                    style = type.text.bodyMedium, color = FsColors.role.content.secondary)
+                Spacer(Modifier.height(Spacing.s2))
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s2)) {
+                    FsButton("Enable notification access", { state.openNotificationSettings() }, small = true)
+                    FsButton("Refresh", refreshAccess, variant = FsButtonVariant.Text, small = true)
+                }
+            }
+        }
+        Spacer(Modifier.height(Spacing.s3))
+        Overline("Tap a sample to send it")
+        Spacer(Modifier.height(Spacing.s2))
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.s2)) {
+            TestSamples.all.forEach { s ->
+                FsChip(s.name, selected = sent == s.id, onClick = {
+                    refreshAccess(); sent = s.id; state.sendTestNotification(s.id)
+                })
+            }
+        }
+        Spacer(Modifier.height(Spacing.s3))
+        FsButton("Send all samples (${TestSamples.all.size})", {
+            refreshAccess(); sent = null; state.sendTestBurst()
+        }, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(Spacing.s3))
+        Overline("Last captured")
+        if (captured.isEmpty() && scams.isEmpty()) {
+            Text("Nothing captured from notifications yet. OTPs and promos are dropped on purpose and never show here.",
+                style = type.text.caption, color = FsColors.role.content.tertiary, modifier = Modifier.padding(top = Spacing.s2))
+        }
+        captured.forEach { t ->
+            Row(Modifier.fillMaxWidth().padding(top = Spacing.s2), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(t.merchant ?: "Unknown merchant", style = type.text.bodyMedium, color = FsColors.role.content.primary, maxLines = 1)
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s1)) {
+                        FsTag(t.category.label, TagTone.Brand)
+                        FsTag("notification", TagTone.Neutral)
+                        if (t.evidenceCount > 1) FsTag("merged ${t.evidenceCount}x", TagTone.Info)
+                    }
+                }
+                AmountText(formatPkr(t.amount.minor, t.amount.currency), credit = t.type == TxnType.CREDIT, style = TextStyleSize.Label)
+            }
+        }
+        scams.take(2).forEach { text ->
+            Row(Modifier.fillMaxWidth().padding(top = Spacing.s2), verticalAlignment = Alignment.CenterVertically) {
+                FsTag("Scam flagged", TagTone.Error)
+                Spacer(Modifier.width(Spacing.s2))
+                Text(text, style = type.text.caption, color = FsColors.role.content.secondary, maxLines = 1, modifier = Modifier.weight(1f))
+            }
+        }
     }
 }

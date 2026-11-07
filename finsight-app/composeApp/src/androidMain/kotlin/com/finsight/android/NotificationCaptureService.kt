@@ -16,9 +16,12 @@ class NotificationCaptureService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val pkg = sbn.packageName
+        val n = sbn.notification
+        // Our own notifications are ignored, except Test Lab alerts (TestNotifier) on their dedicated channel.
+        val ownTest = pkg == packageName && n.channelId == TestNotifier.CHANNEL_ID && (n.flags and Notification.FLAG_GROUP_SUMMARY) == 0
         val allowed = pkg in SMS_PACKAGES || pkg in FINANCE_PACKAGES || (BuildConfig.DEBUG && pkg == "com.android.shell")
-        if (!allowed || pkg == packageName) return
-        val extras = sbn.notification.extras
+        if (!ownTest && (!allowed || pkg == packageName)) return
+        val extras = n.extras
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
         val text = (extras.getCharSequence(Notification.EXTRA_BIG_TEXT) ?: extras.getCharSequence(Notification.EXTRA_TEXT))?.toString() ?: return
         val r = FinSightApp.instance.state.repo.ingest(RawInput(Channel.NOTIFICATION, pkg, title, text, sbn.postTime))
