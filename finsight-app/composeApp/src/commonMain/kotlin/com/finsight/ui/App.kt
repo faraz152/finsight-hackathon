@@ -36,7 +36,7 @@ private fun MainShell(state: AppState) {
     var goalsOpen by remember { mutableStateOf(false) }
     var accountsOpen by remember { mutableStateOf(false) }
 
-    // FinSight functionality behind the InvesTerra hexagon.
+    // FinSight functionality behind the FinSight hexagon.
     val actions = listOf(
         QuickAction("Add transaction", "Type it: \"chai 150 cash\"", "+", QuickActionTone.Gain) { actionsOpen = false; quickAddOpen = true },
         QuickAction("Ask Coach", "Chat in English or Roman Urdu", "✦", QuickActionTone.Brand) { actionsOpen = false; tab = Tab.COACH },

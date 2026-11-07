@@ -4,7 +4,7 @@
 : UI & screens (for building with AI help)
 
 Hi! This phase is about the **screens**. The hard parts (pipeline, Coach logic, privacy, design system) are done.
-You will mostly ask Claude Code to build screens, and a test will tell you if anything breaks the InvesTerra design.
+You will mostly ask Claude Code to build screens, and a test will tell you if anything breaks the FinSight design.
 
 ## 1. Setup (15 min, once)
 1. Install Android Studio (stable) and JDK 17+. Clone: `gh repo clone faraz152/finsight-hackathon && cd finsight-hackathon`

@@ -2,7 +2,7 @@
 
 Skill: `finsight-build-run`.
 
-- [x] Theme: InvesTerra-style dark (Indigo Night), green/yellow/red bands
+- [x] Theme: FinSight dark (Indigo Night), green/yellow/red bands
 - [x] Bottom nav: Home · Transactions · Coach · Privacy
 - [x] Home: month spend / income, Health score card, **data coverage %**, top Pulse card, category bars, "Import demo SMS"
 - [x] Transactions: list with source badge (Rule / You), band colour, kind chip (Refund, Transfer, Duplicate×2)

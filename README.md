@@ -1,5 +1,7 @@
 # FinSight
 
+> Built at Road to DevFest Karachi 2026 (Buildathon 01).
+
 FinSight is a privacy-first AI financial companion. It turns everyday transaction notifications and financial records into a verified picture of your money. Built around on-device processing and a hybrid AI coach, it helps you understand spending, check your financial health and plan smarter decisions, without handing your transaction history to the cloud.
 
 Android-first Kotlin Multiplatform prototype, built for Road to DevFest Karachi 2026 (Buildathon 01).
@@ -58,7 +60,7 @@ Home · Transactions (Review filter, "Why?" sheet) · centre hexagon quick actio
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  ANDROID APP (Compose Multiplatform UI, InvesTerra design tokens)    │
+│  ANDROID APP (Compose Multiplatform UI, FinSight design tokens)    │
 │   Home   Transactions (+Review, Why?)   [hexagon]   Coach   Privacy  │
 │                 AppState (manual DI, StateFlow)                      │
 └──────────────────────────┬───────────────────────────────────────────┘
@@ -129,7 +131,7 @@ The only permission requested is `INTERNET` (used by Coach only) plus the user-g
 | Area | Choice |
 |---|---|
 | Language / platform | Kotlin 2.0.21, Kotlin Multiplatform (Android target; shared code in `commonMain`) |
-| UI | Compose Multiplatform 1.7.1, Material 3, InvesTerra "Indigo Night" design tokens, Manrope font |
+| UI | Compose Multiplatform 1.7.1, Material 3, FinSight "Indigo Night" design tokens, Manrope font |
 | Build | AGP 8.7.3, Gradle 8.14, compileSdk 34, minSdk 26, JDK 21 (JVM target 11) |
 | Concurrency | kotlinx.coroutines 1.9.0, StateFlow |
 | Cloud AI | Gemini via the REST `generateContent` endpoint (`HttpURLConnection`, 6 s connect / 9 s timeout), default model `gemini-3.8-flash` |
@@ -213,7 +215,7 @@ finsight-app/                  Gradle root
 | _TBD_ | Coach / AI |
 | _TBD_ | Pipeline / tests |
 
-Prior work: SMS templates, category taxonomy and design tokens come from the team's earlier FinSight (Flutter) and InvesTerra projects. All code in this repo was written fresh for the hackathon.
+Prior work: SMS templates, category taxonomy and design tokens come from the team's earlier FinSight (Flutter) project. All code in this repo was written fresh for the hackathon.
 
 ## Licence notes
 

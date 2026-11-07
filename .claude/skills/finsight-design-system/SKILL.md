@@ -1,12 +1,12 @@
 ---
 name: finsight-design-system
-description: Build or change ANY FinSight screen or UI element (Compose) using the InvesTerra design tokens and components. Use whenever touching files in finsight-app/.../ui/, adding a screen, card, button, chip, list row, sheet, colour, spacing, font or icon, or when asked to "make it look better", "follow the design", "add a Goals screen", "polish UI".
+description: Build or change ANY FinSight screen or UI element (Compose) using the FinSight design tokens and components. Use whenever touching files in finsight-app/.../ui/, adding a screen, card, button, chip, list row, sheet, colour, spacing, font or icon, or when asked to "make it look better", "follow the design", "add a Goals screen", "polish UI".
 ---
 
-# FinSight design system (ported from InvesTerra "Indigo Night")
+# FinSight design system
 
 Code: `finsight-app/composeApp/src/commonMain/kotlin/com/finsight/ui/designsystem/` (`Tokens.kt`, `Theme.kt`, `Components.kt`).
-Screens: `.../ui/screens/*.kt` — one file per screen. Reference (read-only): `ref/investerra/core/designsystem/`.
+Screens: `.../ui/screens/*.kt` — one file per screen. 
 
 ## The 6 rules (a unit test enforces 1–4)
 1. **No raw colours.** Use `FsColors.role.*` (fill / edge / content / status / change). Never `Color(0x…)` or `Color.Red`.
@@ -36,7 +36,7 @@ Check: `cd finsight-app && ./gradlew :composeApp:testDebugUnitTest` → `DesignT
 | Empty list | `EmptyState(title, body) { action }` |
 | Input | `FsTextField(value, onChange, placeholder, onDone =)` |
 | Status dot | `BandDot(bandColor(band))` |
-| Bottom nav + centre smart button | `FsBottomBar(items, selected, onSelect, hexagonOpen, onHexagon)` (InvesTerra C-10/C-11 hexagon) — already wired in `App.kt` |
+| Bottom nav + centre smart button | `FsBottomBar(items, selected, onSelect, hexagonOpen, onHexagon)` (FinSight C-10/C-11 hexagon) — already wired in `App.kt` |
 | Centre button menu | `QuickActionsOverlay(open, listOf(QuickAction(title, subtitle, glyph, QuickActionTone.*, locked) { … }), onDismiss)` — add FinSight actions in `App.kt` |
 | Bottom sheet | `ModalBottomSheet(containerColor = FsColors.role.fill.sheet, scrimColor = FsColors.scrim)` + `Spacing.sheetPadding` |
 

@@ -1,6 +1,6 @@
 # Phase 0 — Setup (0:00–0:15)
 
-- [x] Clone reference repos into `ref/` (finsight, investerra) — read-only
+- [x] Clone reference material into `ref/` (local only, gitignored) — read-only
 - [x] Project skills: `finsight-build-run`, `finsight-pipeline`, `finsight-coach` in `.claude/skills/`
 - [x] Root `CLAUDE.md`
 - [x] `.plan/` phases + checklists

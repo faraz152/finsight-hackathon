@@ -8,11 +8,11 @@ Privacy-first AI financial companion. Android-first Kotlin Multiplatform app. **
   - `commonMain/.../pipeline` Gate → RegexExtractor → Integrity → RuleCategorizer → Scorer → Pipeline (+ merchant memory)
   - `commonMain/.../coach` Tools, HealthScore, Pulse, WhatIf, PrivacyRouter/Redactor/SanitizedPrompt, CoachAgent
   - `commonMain/.../data` in-memory repository (StateFlow)
-  - `commonMain/.../ui/designsystem` InvesTerra tokens + components (Tokens.kt, Theme.kt, Components.kt); `ui/screens` one file per screen; `ui/App.kt` navigation
+  - `commonMain/.../ui/designsystem` FinSight tokens + components (Tokens.kt, Theme.kt, Components.kt); `ui/screens` one file per screen; `ui/App.kt` navigation
   - `androidMain/.../android` MainActivity, NotificationCaptureService, DemoReplay, GeminiCloudLlm (only network code)
 - `HACKATHON_KMP_PROTOTYPE.md` — the full plan (product, architecture, scope). Source of truth for *what*.
 - `.plan/` — phases, tasks, checklists. Source of truth for *what's next*. Tick boxes as you go.
-- `ref/finsight`, `ref/investerra` — old projects, **read-only reference**. Never edit, never build.
+- `ref/` — optional local reference material (gitignored, not part of this repo). Never edit, never build.
 
 ## Commands
 ```bash
@@ -30,7 +30,7 @@ Use the `finsight-build-run` skill for install/run/notification-test details.
 - **Rules first, LLM second.** The pipeline must work rules-only (no model on phone yet). `LocalLlm` is optional (`NoLocalLlm`).
 - **Money:** `Long` paisa + ISO code. Format with `formatPkr`.
 - **Keep it minimal:** no new libraries unless a task needs them (no SQLDelight/Koin/Ktor today). Persistence is in-memory + demo replay.
-- **Design:** every UI change follows the `finsight-design-system` skill (InvesTerra Indigo Night tokens, Manrope, creem edges, no shadows). `DesignTokenGuardTest` fails on raw colours/dp/sp in `ui/screens`.
+- **Design:** every UI change follows the `finsight-design-system` skill (FinSight Indigo Night tokens, Manrope, creem edges, no shadows). `DesignTokenGuardTest` fails on raw colours/dp/sp in `ui/screens`.
 - Gemini key lives in `finsight-app/local.properties` (`GEMINI_API_KEY=`); never commit it. Missing key → Coach falls back to on-device answers.
 
 ## Versions (pinned, known to build on this machine)

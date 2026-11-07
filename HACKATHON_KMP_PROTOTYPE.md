@@ -137,7 +137,7 @@ The code is written fresh in Kotlin today, so we only reuse data, design and les
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  ANDROID APP (Compose Multiplatform UI, InvesTerra design tokens)    │
+│  ANDROID APP (Compose Multiplatform UI, FinSight design tokens)    │
 │                                                                      │
 │  Dashboard   Transactions   Review Inbox   FinSight Coach   Sources  │
 │      │            │              │          (Chat, Reports,          │
@@ -207,7 +207,7 @@ Key design decisions:
 - **One `LocalLlm` interface:** `suspend fun complete(prompt: String, maxTokens: Int): String` plus a streaming variant for chat. LiteRT-LM is one implementation.
 - **One LLM worker.** The model is loaded once and requests go through a single queue (a `Channel`, or `limitedParallelism(1)`). Never run two inferences at once.
 - **Two model interfaces, one router.** `LocalLlm` (Gemma) serves the pipeline and local Coach answers. `CloudLlm` (Gemini) has one method, `suspend fun complete(prompt: SanitizedPrompt): String`. `SanitizedPrompt` has a private constructor, and only the Redactor can build one, so the compiler enforces the privacy boundary. The pipeline never calls `CloudLlm`.
-- **Money is `Long` in the currency's smallest unit, plus an ISO currency code.** Never `Double`. This follows InvesTerra ADR-0004.
+- **Money is `Long` in the currency's smallest unit, plus an ISO currency code.** Never `Double`. This follows the team's money-and-numerics rule.
 - **Every transaction stores its provenance:** `parse_source`, `category_source`, `confidence`, `needs_review`, `raw_sms`. That is what makes the UI explainable.
 
 ### Module layout
@@ -222,7 +222,7 @@ composeApp/
                    NumberVerifier, Tools (SQL queries), AnalyticsEngine,
                    ReportBuilder, HealthScore, Lessons, prompts
     data/          SQLDelight .sq files, repositories, BankProfiles loader
-    ui/            theme (ported from InvesTerra), screens, view models
+    ui/            theme, screens, view models
     ai/            LocalLlm and CloudLlm interfaces, FakeLlm, FakeCloudLlm
   androidMain/
     ai/LiteRtLlm.kt
@@ -622,7 +622,7 @@ It uses existing transactions, known balances, upcoming recurring bills, goals a
 Principle: one complete, reliable story beats many half-features. Capture, the pipeline and local Coach answers must work in airplane mode; the cloud only adds to them.
 
 ### P0: must ship
-1. KMP app runs on the phone with the InvesTerra dark theme. Network code lives only in `cloud/`, and the architecture test passes.
+1. KMP app runs on the phone with the FinSight dark theme. Network code lives only in `cloud/`, and the architecture test passes.
 2. SQLDelight schema with provenance columns: `transactions` (amount_minor, currency, type, merchant, merchant_key, category_id, confidence, category_source, parse_source, channel, source_app, needs_review, raw_text, created_at), `categories`, `accounts` (minimal), `merchant_memory`, `allowed_sources`.
 3. **Automatic capture:** NotificationListenerService for SMS apps, ported from the old `BankNotificationService.kt` (it is already Kotlin). Plus **Demo Replay** (the 58 templates) as the reliable demo input.
 4. **Manual entry:** a simple Add Transaction form (amount, type, merchant, category, date).
@@ -737,16 +737,9 @@ class GeminiCloudLlm(/* Firebase AI Logic model handle */) : CloudLlm {
 
 Skip on purpose: full self-transfer reconciliation and unknown-account merging. They were the most fiddly features last time; only the 6.2 minimum (fingerprint, refund/reversal keywords) is in scope.
 
-### Design tokens: InvesTerra
+### Design tokens
 
-Private repo: `gh repo clone faraz152/investerra`. From `core/designsystem/src/main/kotlin/pk/investerra/core/designsystem/`, take:
-- `theme/InvesTerraColors.kt` (Indigo Night, dark default, role-based colours, gain/loss/warning tones). These map well to green, yellow and red confidence bands.
-- `theme/Typography.kt` (Manrope, tabular figures).
-- `theme/Shapes.kt`, `Dimensions.kt`, `ComponentSizes.kt`, `Motion*.kt`.
-- `component/`: Button, Chip, ChangeChip, FinanceRows, AllocationBar, EdgeSurface, IndexCard.
-- `docs/adr/0004-money-and-numerics.md`.
-
-InvesTerra is Android-only Compose, so port the theme into `commonMain` and replace `R.font.*` with Compose Multiplatform resources. Allow 45 minutes. If it drags, take only colours and typography and use stock Material3 components.
+The FinSight design system ("Indigo Night" dark palette, Manrope typography with tabular figures, 4 dp spacing, edge-style cards) lives in `ui/designsystem` (Tokens.kt, Theme.kt, Components.kt, Navigation.kt). Use colours and typography from there and stock Material3 components where nothing fits.
 
 ---
 
@@ -810,7 +803,7 @@ Keep the engine and change the data. The reusable pattern is: **messy text on th
 | Gemma too slow per transaction | Fast path skips Gemma for confident rule hits; use the smaller model; short prompts; batch in the background |
 | Gemma returns bad JSON or invents values | Defensive parsing, one retry, allowed-list validation, verifier against the SMS text |
 | KMP/Gradle setup eats an hour | Start from the official KMP wizard template; do not hand-edit Gradle beyond adding dependencies |
-| InvesTerra port drags | Colours and typography only, stock Material3 |
+| Design system work drags | Colours and typography only, stock Material3 |
 | Venue Wi-Fi down during the Coach demo | Hotspot first; the router falls back to the device automatically; backup video shows the hybrid route |
 | Gemini API key leaks | Use Firebase AI Logic; no raw key in the APK or git; App Check before release |
 | Judges challenge the privacy claim now that the app has `INTERNET` | Show the architecture test, the `SanitizedPrompt` type, the "What was shared?" sheet and the Cloud log |
@@ -824,7 +817,7 @@ Keep the engine and change the data. The reusable pattern is: **messy text on th
 ## 15. Morning checklist (laptop, before 9:00)
 
 - [ ] Android Studio (stable), JDK 17+, Android SDK, Kotlin Multiplatform plugin installed.
-- [ ] `gh auth login`, then `gh repo clone faraz152/finsight-complete-project` (`main` has everything) and `gh repo clone faraz152/investerra`.
+- [ ] `gh auth login` and clone this repository.
 - [ ] Phone: USB debugging on, `adb devices` shows it. Bring the charger, a cable and a hotspot.
 - [ ] Gemma `.litertlm` model downloaded on your own connection and copied to the phone.
 - [ ] Firebase project created, Firebase AI Logic enabled, `google-services.json` ready (not committed if the repo is public), one Gemini test call working, App Check set up, AI monitoring logging off.

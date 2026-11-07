@@ -53,7 +53,7 @@ Free core (capture, review, basic Coach) on device, which costs us almost nothin
 Trackers stop at charts and need typing. FinSight captures automatically, verifies and explains each record, tells you how complete its picture is, and then diagnoses (Health 2.0), warns (Pulse) and plans (What If), while keeping your history on the phone.
 
 ### "Did you build all this today?"
-The code was written fresh today. We reused data and design from the team's earlier work: the labelled SMS templates, the category taxonomy and the InvesTerra design tokens.
+The code was written fresh today. We reused data and design from the team's earlier work: the labelled SMS templates, the category taxonomy and the FinSight design tokens.
 
 ### "What's next?"
 1. On-device Gemma via LiteRT-LM for unseen formats and unknown merchants, with verification against the text.

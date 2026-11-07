@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-// Ported from InvesTerra components (C-01 creem edge, C-20 button, chips/tags, finance rows, allocation bar, states).
+// FinSight design system.
 // RULES: no shadow(), no elevation, no gradients, no blur. Every surface is an EdgeSurface. Every money value uses
 // FsTheme.type.numeric.*. Screens compose these; they do not restyle them.
 
@@ -191,7 +191,7 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) =
 @Composable
 fun Overline(text: String) = Text(text.uppercase(), style = FsTheme.type.text.labelSmall, color = FsColors.role.content.tertiary)
 
-/** Key–value line (InvesTerra KeyValueRow). */
+/** Key–value line (FinSight KeyValueRow). */
 @Composable
 fun KeyValueRow(key: String, value: String, valueColor: Color = FsColors.role.content.primary) {
     Row(Modifier.fillMaxWidth().padding(vertical = Spacing.s1), verticalAlignment = Alignment.CenterVertically) {
@@ -247,7 +247,7 @@ fun EmptyState(title: String, body: String, action: (@Composable () -> Unit)? = 
     }
 }
 
-/** Text input in InvesTerra style (radius 14, tertiary rest outline, brand focus). */
+/** Text input in FinSight style (radius 14, tertiary rest outline, brand focus). */
 @Composable
 fun FsTextField(value: String, onValueChange: (String) -> Unit, placeholder: String, modifier: Modifier = Modifier, singleLine: Boolean = true, onDone: (() -> Unit)? = null) {
     OutlinedTextField(
@@ -266,7 +266,7 @@ fun FsTextField(value: String, onValueChange: (String) -> Unit, placeholder: Str
 }
 
 /**
- * InvesTerra segmented control (recessed track, brand thumb with control edge). Used for the global AI mode switch.
+ * FinSight segmented control (recessed track, brand thumb with control edge). Used for the global AI mode switch.
  * [options] are (label, caption) pairs; [selected] is the index.
  */
 @Composable

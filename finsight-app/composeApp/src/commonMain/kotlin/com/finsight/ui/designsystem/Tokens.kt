@@ -5,10 +5,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-// Ported 1:1 from InvesTerra `core/designsystem/theme` (Indigo Night, dark default, DD-01).
+// FinSight design tokens (Indigo Night, dark default).
 // RULE: screens never use Color(0x...) or raw dp. Use FsColors roles, Spacing, Radius, Sizes, Edges.
 
-/** Base palette (InvesTerra `color.dark.*`). Prefer [FsColors.role] in feature code. */
+/** Base palette (FinSight `color.dark.*`). Prefer [FsColors.role] in feature code. */
 @Immutable
 object FsColors {
     // bg
@@ -99,7 +99,7 @@ object FsColors {
             val downContent = lossText; val downContainer = lossSubtle
             val flatContent = textSecondary; val flatContainer = subtle
         }
-        /** Quick-action icon discs (InvesTerra QuickActionRoles): glyph, disc fill, disc edge. */
+        /** Quick-action icon discs (FinSight QuickActionRoles): glyph, disc fill, disc edge. */
         object quickAction {
             val gain = Triple(gainText, gainSubtle, edgeGain)
             val loss = Triple(lossText, lossSubtle, edgeLoss)
@@ -111,7 +111,7 @@ object FsColors {
     }
 }
 
-/** InvesTerra `Spacing` (4 dp grid). */
+/** FinSight `Spacing` (4 dp grid). */
 object Spacing {
     val s0: Dp = 0.dp; val s1: Dp = 4.dp; val s2: Dp = 8.dp; val s3: Dp = 12.dp; val s4: Dp = 16.dp
     val s5: Dp = 20.dp; val s6: Dp = 24.dp; val s8: Dp = 32.dp; val s10: Dp = 40.dp; val s12: Dp = 48.dp; val s16: Dp = 64.dp
@@ -123,21 +123,21 @@ object Spacing {
     val sheetPadding: Dp = 24.dp
 }
 
-/** InvesTerra `Radius`. */
+/** FinSight `Radius`. */
 object Radius {
     val xs: Dp = 6.dp; val segmented: Dp = 11.dp; val control: Dp = 14.dp; val card: Dp = 20.dp
     val popup: Dp = 22.dp; val docked: Dp = 28.dp; val full: Dp = 999.dp
     val hexagonCorner: Dp = 8.dp
 }
 
-/** InvesTerra `Edges`: 1 dp outline + thicker bottom edge; press travel = bottom − outline. */
+/** FinSight `Edges`: 1 dp outline + thicker bottom edge; press travel = bottom − outline. */
 object Edges {
     val outline: Dp = 1.dp
     object bottom { val card: Dp = 4.dp; val control: Dp = 3.dp; val disc: Dp = 2.dp; val hexagon: Dp = 4.dp; val none: Dp = 1.dp }
     object pressTravel { val card: Dp = 3.dp; val control: Dp = 2.dp; val hexagon: Dp = 3.dp }
 }
 
-/** InvesTerra `ComponentSizes` (subset). */
+/** FinSight `ComponentSizes` (subset). */
 object Sizes {
     val touchTarget: Dp = 48.dp
     val buttonHeight: Dp = 52.dp

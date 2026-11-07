@@ -35,8 +35,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-// Ported from InvesTerra navigation: C-10 docked bottom bar, C-11 hexagon, C-12 quick actions.
-// Design = InvesTerra. Function = FinSight (the actions are passed in by App.kt).
+// FinSight design system.
+// Design = FinSight. Function = FinSight (the actions are passed in by App.kt).
 
 data class NavItem(val label: String, val glyph: String)
 

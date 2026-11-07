@@ -20,7 +20,7 @@ import com.finsight.resources.manrope_regular
 import com.finsight.resources.manrope_semibold
 import org.jetbrains.compose.resources.Font
 
-// Ported from InvesTerra `theme/Typography.kt` (DD-02: Manrope everywhere; every figure uses tabular numbers).
+// FinSight design system.kt` (DD-02: Manrope everywhere; every figure uses tabular numbers).
 
 /** Word styles (`typography.latin.*`). */
 @Immutable
