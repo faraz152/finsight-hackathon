@@ -36,6 +36,8 @@ Check: `cd finsight-app && ./gradlew :composeApp:testDebugUnitTest` → `DesignT
 | Empty list | `EmptyState(title, body) { action }` |
 | Input | `FsTextField(value, onChange, placeholder, onDone =)` |
 | Status dot | `BandDot(bandColor(band))` |
+| Bottom nav + centre smart button | `FsBottomBar(items, selected, onSelect, hexagonOpen, onHexagon)` (InvesTerra C-10/C-11 hexagon) — already wired in `App.kt` |
+| Centre button menu | `QuickActionsOverlay(open, listOf(QuickAction(title, subtitle, glyph, QuickActionTone.*, locked) { … }), onDismiss)` — add FinSight actions in `App.kt` |
 | Bottom sheet | `ModalBottomSheet(containerColor = FsColors.role.fill.sheet, scrimColor = FsColors.scrim)` + `Spacing.sheetPadding` |
 
 ## Layout recipe

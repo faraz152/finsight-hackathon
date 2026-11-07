@@ -22,8 +22,8 @@ Full rules + component table: `.claude/skills/finsight-design-system/SKILL.md`.
 
 ## 4. Tasks (in order). Each has a ready prompt.
 
-- [ ] **T1 · Goals screen (new tab)** — plan 6.1/6.7
-  > Use the finsight-design-system skill. Add a 5th bottom tab "Goals" (between Coach and Privacy) with a new file ui/screens/GoalsScreen.kt. Show: recurring payments from state.tools.recurringPayments() as cards with name, amount (AmountText) and "around day N"; a "What If?" card with an FsTextField for a price and an FsButton "Check" that shows WhatIf.afford(state.tools, priceMinor) verdict and lines. Use only design-system components. Run the unit tests.
+- [ ] **T1 · Goals screen** — plan 6.1/6.7
+  > Use the finsight-design-system skill. Add a Goals screen in a new file ui/screens/GoalsScreen.kt, opened from a new QuickAction "Goals & bills" in the centre hexagon menu in App.kt (the bottom bar keeps 4 tabs + hexagon). Show: recurring payments from state.tools.recurringPayments() as cards with name, amount (AmountText) and "around day N"; a "What If?" card with an FsTextField for a price and an FsButton "Check" that shows WhatIf.afford(state.tools, priceMinor) verdict and lines. Use only design-system components. Run the unit tests.
 
 - [ ] **T2 · Health detail sheet** — plan 6.5
   > Use the finsight-design-system skill. When the Financial health MetricTile on Home is tapped, open a ModalBottomSheet (not go to Coach) showing HealthScore.compute(...) : score with band colour, a profile FsChip row to switch state.profile, then each check as a KeyValueRow-style row with its detail and an FsTag "unknown" when score is null, then "Next steps" list. Run the unit tests.
@@ -41,7 +41,7 @@ Full rules + component table: `.claude/skills/finsight-design-system/SKILL.md`.
   > Use the finsight-design-system skill. In PrivacyScreen add an FsCard "How accurate is FinSight?" showing: templates tested 59, amount correct 59/59, direction correct 59/59, transactions sent for review = count of needsReview / total from state.repo.transactions. Use KeyValueRow. Run the unit tests.
 
 - [ ] **T7 · Icons instead of glyphs (stretch)**
-  > Use the finsight-design-system skill. Replace the text glyphs in the bottom NavigationBar with Material icons (add compose.materialIconsExtended only if needed) tinted with FsColors roles. Run the unit tests and build the APK.
+  > Use the finsight-design-system skill. Replace the text glyphs in FsBottomBar and the quick-action discs with Material icons (add compose.materialIconsExtended only if needed) tinted with FsColors roles. Run the unit tests and build the APK.
 
 ## 5. When stuck
 - Red build? Copy the error into Claude: "Fix this build error, keep the design-system rules."

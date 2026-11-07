@@ -21,6 +21,8 @@ class AppState(
     val log = CoachLog()
     val cloudEnabled = MutableStateFlow(true)
     val profile = MutableStateFlow(Profile.SALARIED)
+    /** Text to pre-fill (or auto-send) in Coach, set by the centre quick actions. */
+    val coachDraft = MutableStateFlow<String?>(null)
     val coach = CoachAgent(repo, tools, cloud, log, isOnline, { cloudEnabled.value }, { profile.value }, now)
 
     fun quickAdd(line: String) = repo.ingest(RawInput(Channel.MANUAL, "You", null, line, now()))

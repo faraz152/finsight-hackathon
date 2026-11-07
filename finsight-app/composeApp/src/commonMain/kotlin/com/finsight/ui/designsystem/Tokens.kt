@@ -59,6 +59,7 @@ object FsColors {
             val chipSelected = brandSubtle
             val chipUnselected = surface
             val disabled = subtle
+            val hexagon = brandFill
         }
         object edge {
             val card = edgeCard
@@ -75,6 +76,7 @@ object FsColors {
             val divider = borderDefault
             val inputRest = textTertiary
             val inputFocus = brandFill
+            val hexagon = edgeBrand
         }
         object content {
             val primary = textPrimary
@@ -97,6 +99,15 @@ object FsColors {
             val downContent = lossText; val downContainer = lossSubtle
             val flatContent = textSecondary; val flatContainer = subtle
         }
+        /** Quick-action icon discs (InvesTerra QuickActionRoles): glyph, disc fill, disc edge. */
+        object quickAction {
+            val gain = Triple(gainText, gainSubtle, edgeGain)
+            val loss = Triple(lossText, lossSubtle, edgeLoss)
+            val info = Triple(infoText, infoSubtle, edgeInfo)
+            val warning = Triple(warningText, warningSubtle, edgeWarn)
+            val brand = Triple(brandText, brandSubtle, edgeBrand)
+            val neutral = Triple(textTertiary, subtle, edgeNeutral)
+        }
     }
 }
 
@@ -116,13 +127,14 @@ object Spacing {
 object Radius {
     val xs: Dp = 6.dp; val segmented: Dp = 11.dp; val control: Dp = 14.dp; val card: Dp = 20.dp
     val popup: Dp = 22.dp; val docked: Dp = 28.dp; val full: Dp = 999.dp
+    val hexagonCorner: Dp = 8.dp
 }
 
 /** InvesTerra `Edges`: 1 dp outline + thicker bottom edge; press travel = bottom − outline. */
 object Edges {
     val outline: Dp = 1.dp
-    object bottom { val card: Dp = 4.dp; val control: Dp = 3.dp; val disc: Dp = 2.dp; val none: Dp = 1.dp }
-    object pressTravel { val card: Dp = 3.dp; val control: Dp = 2.dp }
+    object bottom { val card: Dp = 4.dp; val control: Dp = 3.dp; val disc: Dp = 2.dp; val hexagon: Dp = 4.dp; val none: Dp = 1.dp }
+    object pressTravel { val card: Dp = 3.dp; val control: Dp = 2.dp; val hexagon: Dp = 3.dp }
 }
 
 /** InvesTerra `ComponentSizes` (subset). */
@@ -138,4 +150,16 @@ object Sizes {
     val dot: Dp = 10.dp
     val barHeight: Dp = 10.dp
     val navBarHeight: Dp = 72.dp
+    // C-11 hexagon (centre "smart" button)
+    val hexagonWidth: Dp = 68.dp
+    val hexagonHeight: Dp = 78.dp
+    val hexagonRaise: Dp = 38.dp
+    val hexagonSlack: Dp = 2.dp
+    val hexagonGlyph: Dp = 28.dp
+    // C-12 quick actions
+    val quickActionsSideInset: Dp = 20.dp
+    val quickActionsGap: Dp = 14.dp
+    val quickActionRow: Dp = 62.dp
+    val iconDisc: Dp = 44.dp
+    val popoverWidth: Dp = 360.dp
 }

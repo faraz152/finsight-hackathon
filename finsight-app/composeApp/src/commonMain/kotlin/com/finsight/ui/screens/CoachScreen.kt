@@ -41,6 +41,8 @@ fun CoachScreen(state: AppState) {
     var shared by remember { mutableStateOf<CoachAnswer?>(null) }
     val profile by state.profile.collectAsState()
     val listState = rememberLazyListState()
+    val draft by state.coachDraft.collectAsState()
+    LaunchedEffect(draft) { draft?.let { input = it; state.coachDraft.value = null } }
 
     fun send(q: String) {
         if (q.isBlank() || busy) return
