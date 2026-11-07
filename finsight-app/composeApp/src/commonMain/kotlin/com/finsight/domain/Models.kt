@@ -61,6 +61,10 @@ data class Transaction(
     val fingerprint: String,
     val evidenceCount: Int = 1,
     val explanation: List<String> = emptyList(),
+    /** [Account.id] this record belongs to (null = unknown / not yet resolved). */
+    val accountId: String? = null,
+    /** Debit between two of the user's own accounts: a transfer, never spending. */
+    val ownTransfer: Boolean = false,
 ) {
     val band: Band get() = when {
         confidence >= 0.90 -> Band.GREEN
@@ -68,9 +72,28 @@ data class Transaction(
         else -> Band.RED
     }
     /** Counts toward spending analytics (refunds, own transfers, reversals excluded). */
-    val isSpend: Boolean get() = type == TxnType.DEBIT && status != TxnStatus.REVERSED &&
+    val isSpend: Boolean get() = type == TxnType.DEBIT && status != TxnStatus.REVERSED && !ownTransfer &&
         (kind == TxnKind.EXPENSE || kind == TxnKind.FEE || kind == TxnKind.TRANSFER_OUT)
     val isIncome: Boolean get() = type == TxnType.CREDIT && kind == TxnKind.INCOME && status != TxnStatus.REVERSED
 }
 
 enum class Band { GREEN, YELLOW, RED }
+
+enum class AccountType(val label: String) { BANK("Bank"), WALLET("Wallet"), CARD("Card"), CASH("Cash") }
+
+/** A bank account, wallet, card or cash pocket that transactions land in (old FinSight `accounts` table). */
+data class Account(
+    val id: String,
+    val institution: String,
+    val type: AccountType,
+    val last4: String?,
+    val nickname: String?,
+    val isMine: Boolean = true,
+    val balanceMinor: Long?,
+    val balanceAt: Long?,
+    val currency: String = "PKR",
+    val createdAt: Long,
+) {
+    val displayName: String get() = nickname?.takeIf { it.isNotBlank() }
+        ?: (if (type == AccountType.CASH) institution else "$institution ${type.label}" + (last4?.let { " ••$it" } ?: ""))
+}

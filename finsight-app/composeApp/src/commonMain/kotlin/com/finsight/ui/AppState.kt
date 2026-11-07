@@ -21,7 +21,7 @@ class AppState(
     val store: KeyValueStore? = null,
 ) {
     val repo = Repository(store)
-    val tools = Tools({ repo.transactions.value }, now)
+    val tools = Tools({ repo.transactions.value }, now, { repo.accounts.value })
     val log = CoachLog(store)
     val cloudEnabled = MutableStateFlow(store?.read("cloud_enabled")?.toBooleanStrictOrNull() ?: true)
     val profile = MutableStateFlow(store?.read("profile")?.let { p -> Profile.entries.firstOrNull { it.name == p } } ?: Profile.SALARIED)

@@ -30,7 +30,7 @@ class Pipeline(
         val why = mutableListOf<String>()
         why += ex.checks
         if (ex.type == null) why += "Direction unclear — assumed debit"
-        val cls = Integrity.classify(input.text, type, ownAccounts(), ex.accountLast4)
+        val cls = Integrity.classify(input.text, type, ownAccounts(), Integrity.counterpartyLast4(input.text))
         why += cls.reasons
         val key = Integrity.merchantKey(ex.merchant)
         val cat = RuleCategorizer.categorize(input.text, ex.merchant, key, cls.kind, memory())
@@ -46,7 +46,7 @@ class Pipeline(
                 categorySource = cat.source, parseSource = ParseSource.REGEX, channel = input.channel, sourceApp = input.sourceApp,
                 needsReview = conf < 0.90, rawText = input.text, timestamp = input.receivedAt,
                 fingerprint = Integrity.fingerprint(key, amount, ex.accountLast4, ex.reference, input.receivedAt),
-                explanation = why,
+                explanation = why, ownTransfer = cls.ownTransfer,
             ),
         )
     }
