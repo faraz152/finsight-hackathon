@@ -108,6 +108,18 @@ class Repository(private val store: KeyValueStore? = null) {
         save()
     }
 
+    /** On-device Gemma (GemmaReviewer) relabels one record. Never overrides a user decision; does not write merchant memory. */
+    fun relabel(id: Long, category: Category, confidence: Double, source: CategorySource, note: String) {
+        _txns.update { list ->
+            list.map {
+                if (it.id != id || it.categorySource == CategorySource.USER || it.categorySource == CategorySource.USER_MEMORY) it
+                else it.copy(category = category, confidence = confidence, categorySource = source,
+                    needsReview = confidence < 0.90, explanation = it.explanation + note)
+            }
+        }
+        save()
+    }
+
     fun delete(id: Long) { _txns.update { l -> l.filterNot { it.id == id } }; save() }
     fun clearAll() { _txns.value = emptyList(); _memory.value = emptyMap(); _scams.value = emptyList(); _lastImport.value = null; save() }
 
