@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import com.finsight.coach.CoachAnswer
 import com.finsight.coach.Profile
+import com.finsight.coach.Pulse
 import com.finsight.coach.Route
 import com.finsight.domain.formatPkr
 import com.finsight.ui.AppState
@@ -42,6 +43,9 @@ fun CoachScreen(state: AppState) {
     val profile by state.profile.collectAsState()
     val listState = rememberLazyListState()
     val draft by state.coachDraft.collectAsState()
+    val txns by state.repo.transactions.collectAsState()
+    val pulse = remember(txns) { Pulse.cards(state.tools) }
+    var dismissed by remember { mutableStateOf(setOf<String>()) }
     LaunchedEffect(draft) { draft?.let { input = it; state.coachDraft.value = null } }
 
     fun send(q: String) {
@@ -62,6 +66,24 @@ fun CoachScreen(state: AppState) {
                     FsChip(profile.label, selected = true, onClick = { open = true })
                     DropdownMenu(open, { open = false }, containerColor = FsColors.role.fill.sheet) {
                         Profile.entries.forEach { p -> DropdownMenuItem({ Text(p.label, style = FsTheme.type.text.bodyMedium) }, { state.profile.value = p; open = false }) }
+                    }
+                }
+            }
+        }
+        val visiblePulse = pulse.filter { it.title !in dismissed }
+        if (visiblePulse.isNotEmpty()) LazyRow(
+            Modifier.padding(bottom = Spacing.s2),
+            contentPadding = PaddingValues(horizontal = Spacing.gutter),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.s3),
+        ) {
+            items(visiblePulse, key = { it.title }) { c ->
+                FsCard(Modifier.width(Sizes.popoverWidth * 0.8f), tone = NoticeTone.Info) {
+                    Text("FinSight Pulse · ${c.title}", style = FsTheme.type.text.labelSmall, color = FsColors.role.status.infoContent)
+                    Text(c.body, style = FsTheme.type.text.bodyMedium, color = FsColors.role.content.primary, modifier = Modifier.padding(top = Spacing.s1))
+                    Text("Why: ${c.why}", style = FsTheme.type.text.caption, color = FsColors.role.content.tertiary, modifier = Modifier.padding(top = Spacing.s1))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        FsButton("Dismiss", { dismissed = dismissed + c.title }, variant = FsButtonVariant.Text, small = true)
+                        FsButton("Ask", { send("Tell me more: " + c.body) }, enabled = !busy, variant = FsButtonVariant.Text, small = true)
                     }
                 }
             }
