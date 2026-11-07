@@ -24,13 +24,22 @@ object RegexExtractor {
     private val maskedRx = Regex("""[*xX]{2,}\s*([0-9]{4})\b""")
     private val refRx = Regex("""(?:ref(?:erence)?|trx|tid|txn|transaction)\s*(?:id|no\.?|#)?\s*[:\-]?\s*([A-Z0-9]{6,})""", RegexOption.IGNORE_CASE)
     private val merchantRx = Regex(
-        """(?:\bat\b|\bto\b|\bfrom\b|\bby\b|\bfor\b|\bvia\b)\s+([A-Za-z][A-Za-z0-9&.'\- ]{1,40}?)(?=\s+(?:on|at|via|from|ref|trx|tid|with|using|for|dated|is|has|\d)|[.,;\n]|$)""",
+        """(?:\bat\b|\bto\b|\bfrom\b|\bby\b|\bfor\b)\s+([A-Za-z@][A-Za-z0-9&.'_\- ]{1,40}?)(?=\s+(?:on|at|to|via|from|ref|trx|tid|with|using|for|dated|is|has|into|a/c|account|iban|bill|successful|\d)|\s*[(*]|[.,;:\n]|$)""",
         RegexOption.IGNORE_CASE,
     )
-    private val debitWords = Regex("""(debited|sent|paid|transferred to|withdrawn|purchase|spent|charged|payment of|deducted|bill paid|used for|cash out|transfer of)""", RegexOption.IGNORE_CASE)
+    private const val NAME = """([A-Za-z][A-Za-z0-9&.'\- ]{1,40}?)"""
+    /** Pakistan-specific shapes, tried before the generic "at/to/from" rule. */
+    private val specificMerchantRx: List<Regex> = listOf(
+        Regex("""(?:QR Code|QR|QuickPay ID:?\s*\d*)\s+at\s+$NAME(?=\s*,|\.|\s+on\b)""", RegexOption.IGNORE_CASE),
+        Regex("""(?:load|top ?up|recharge)\s+(?:of\s+\S+\s*[0-9][0-9,.]*\s+)?for\s+([A-Za-z]+(?:\s+(?:PREPAID|POSTPAID))?)""", RegexOption.IGNORE_CASE),
+        Regex("""\b([A-Z][A-Za-z\-]+(?:\s[A-Z][A-Za-z\-]+)?)\s+[Bb]ill\b"""),
+        Regex("""\bsent to\s+$NAME\s*(?:\(|JazzCash|Easypaisa|A/C|Account|IBAN|\*|\d)""", RegexOption.IGNORE_CASE),
+    )
+    private val rails = setOf("raast", "ibft", "easypaisa", "jazzcash", "qr", "consumer", "transfer", "your", "you", "the", "paid", "credit card", "cash", "debit card")
+    private val debitWords = Regex("""(debited|sent|paid|transferred to|withdrawn|withdrawal|purchase|spent|charged|payment of|deducted|bill paid|used for|used at|cash out|transfer of|transfer to|top up|mobile load)""", RegexOption.IGNORE_CASE)
     private val creditWords = Regex("""(credited|received|deposited|refund|reversed|cashback received|salary|cash in)""", RegexOption.IGNORE_CASE)
     private val dateRx = Regex("""\b(\d{1,2}[/\-.](\d{1,2}|[A-Za-z]{3})[/\-.]\d{2,4})\b""")
-    private val stopMerchant = setOf("your", "you", "account", "a/c", "ac", "the", "rs", "pkr", "mobile", "wallet", "card")
+    private val stopMerchant = setOf("your", "you", "account", "a/c", "ac", "the", "rs", "pkr", "mobile", "wallet", "card", "checking", "savings", "transfer")
 
     fun parseMinor(s: String): Long? {
         val clean = s.replace(",", "")
@@ -46,6 +55,33 @@ object RegexExtractor {
             ?: amountAfterRx.find(text)
         return m?.groupValues?.get(1)?.let(::parseMinor)?.takeIf { it > 0 }
     }
+
+    private fun cleanName(raw: String, allowWallet: Boolean = false): String? {
+        var words = raw.trim().trimEnd('.', '*', ',').split(Regex("""\s+""")).filter { it.isNotBlank() }
+        while (words.isNotEmpty() && words.first().lowercase() in stopMerchant + setOf("your", "paid", "the", "my")) words = words.drop(1)
+        val name = words.joinToString(" ")
+        return name.takeIf { it.length >= 2 && (it.lowercase() !in rails || (allowWallet && it.lowercase() in setOf("easypaisa", "jazzcash"))) && it.none(Char::isDigit) }
+    }
+
+    fun findMerchant(text: String): String? {
+        specificMerchantRx.forEachIndexed { i, rx ->
+            rx.findAll(text).forEach { m -> cleanName(m.groupValues[1], allowWallet = i == specificMerchantRx.lastIndex)?.let { return it } }
+        }
+        return merchantRx.findAll(text).mapNotNull { m ->
+            val cand = m.groupValues[1].trim().trimEnd('.')
+            if (cand.lowercase().split(" ").first() in stopMerchant) null else cleanName(cand)
+        }.firstOrNull()
+    }
+
+    /** Distinct transaction-looking amounts (not balance / limit / fee / deduction). More than one = contradictory. */
+    fun distinctAmounts(text: String): Set<Long> {
+        val balRanges = balanceRx.findAll(text).map { it.range }.toList()
+        return amountRx.findAll(text).filter { a ->
+            balRanges.none { it.first <= a.range.first && a.range.last <= it.last } &&
+                !labelBefore.containsMatchIn(text.substring(maxOf(0, a.range.first - 14), a.range.first))
+        }.mapNotNull { parseMinor(it.groupValues[1])?.takeIf { v -> v > 0 } }.toSet()
+    }
+    private val labelBefore = Regex("""(limit|fee|charges?|deduction|pay|bal(ance)?|tax|wht)\W*$""", RegexOption.IGNORE_CASE)
 
     fun extract(text: String): Extracted {
         val checks = mutableListOf<String>()
@@ -69,10 +105,10 @@ object RegexExtractor {
             else -> null
         }
         if (type != null) { conf += 0.15; checks += "Direction from keyword \"${(if (type == TxnType.DEBIT) d else c)!!.value}\"" }
-        val merchant = merchantRx.findAll(text).map { it.groupValues[1].trim().trimEnd('.') }
-            .firstOrNull { cand -> cand.length >= 2 && cand.lowercase().split(" ").first() !in stopMerchant && !cand.any { it.isDigit() && cand.length < 6 } }
+        val merchant = findMerchant(text)
         if (merchant != null) { conf += 0.20; checks += "Merchant \"$merchant\" appears in text" }
         if (dateRx.containsMatchIn(text)) conf += 0.15 else conf += 0.05 // receivedAt is a fine fallback
+        if (amount != null && distinctAmounts(text).size > 1) { conf -= 0.25; checks += "Message has conflicting amounts — please confirm" }
         val balance = balanceRx.find(text)?.groupValues?.get(1)?.let(::parseMinor)
         if (balance != null) { conf += 0.10; checks += "Balance found" }
         val acct = (accountRx.find(text) ?: maskedRx.find(text))?.groupValues?.get(1)
