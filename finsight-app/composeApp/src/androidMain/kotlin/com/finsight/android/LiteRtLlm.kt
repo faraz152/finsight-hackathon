@@ -59,12 +59,13 @@ class LiteRtLlm(private val context: Context, fileName: String = "model.litertlm
         try {
             val t0 = System.currentTimeMillis()
             // Fresh conversation per call: pipeline prompts are independent; near-greedy sampling.
-            val cfg = ConversationConfig(samplerConfig = SamplerConfig(topK = 1, topP = 1.0, temperature = 0.1, seed = 0))
-            e.createConversation(cfg).use { conv ->
+            // Model-default sampling (as in Google AI Edge Gallery). Forcing topK=1/temp 0.1 made the 1B int4 model
+            // degenerate into digits ("1", "123") on device.
+            e.createConversation(ConversationConfig()).use { conv ->
                 val reply = conv.sendMessage(Message.of(prompt))
                 val text = reply.contents.filterIsInstance<Content.Text>().joinToString("") { it.text }
                     .ifBlank { reply.toString() }
-                Log.d(TAG, "Gemma ${System.currentTimeMillis() - t0} ms → ${text.take(40)}")
+                Log.d(TAG, "Gemma ${System.currentTimeMillis() - t0} ms → ${text.take(60).replace("\n", " ")}")
                 text
             }
         } catch (t: Throwable) {
