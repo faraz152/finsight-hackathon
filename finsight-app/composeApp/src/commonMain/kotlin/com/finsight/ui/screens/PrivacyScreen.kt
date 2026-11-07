@@ -12,6 +12,14 @@ import androidx.compose.ui.Modifier
 import com.finsight.ui.AppState
 import com.finsight.ui.designsystem.*
 
+// Pipeline accuracy, rules only (from docs/ACCURACY.md; update both together).
+private const val ACC_TEMPLATES_GLOBAL = 59      // sms_test_templates.json (PK, IN, AE, GB, US, CA)
+private const val ACC_TEMPLATES_PK = 38          // pk_extra_templates.json (Pakistan only)
+private const val ACC_AMOUNT_PCT = 100
+private const val ACC_DIRECTION_PCT = 100
+private const val ACC_MERCHANT_PCT = 100
+private const val ACC_ADVERSARIAL_PASSING = 12   // AdversarialTest
+
 @Composable
 fun PrivacyScreen(state: AppState) {
     val cloudOn by state.cloudEnabled.collectAsState()
@@ -63,6 +71,19 @@ fun PrivacyScreen(state: AppState) {
                 Text("${e.route} · ${e.model} · ${e.latencyMs} ms · ${e.status}", style = type.text.caption, color = FsColors.role.content.secondary, modifier = Modifier.padding(top = Spacing.s2, bottom = Spacing.s1))
                 CodeBox(e.payload)
             }
+        }
+        FsCard {
+            SectionHeader("How accurate is FinSight?")
+            KeyValueRow("Labelled test messages", "$ACC_TEMPLATES_GLOBAL + $ACC_TEMPLATES_PK Pakistani")
+            KeyValueRow("Amount correct", "$ACC_AMOUNT_PCT%")
+            KeyValueRow("Direction (in / out) correct", "$ACC_DIRECTION_PCT%")
+            KeyValueRow("Merchant correct", "$ACC_MERCHANT_PCT%")
+            KeyValueRow("Adversarial tests", "$ACC_ADVERSARIAL_PASSING passing", FsColors.role.change.upContent)
+            val review = txns.count { it.needsReview }
+            KeyValueRow("Sent to review on this phone",
+                if (txns.isEmpty()) "0/0" else "$review/${txns.size} · ${review * 100 / txns.size}%")
+            Text("Measured on labelled test messages; real inboxes vary.", style = type.text.caption, color = FsColors.role.content.tertiary,
+                modifier = Modifier.padding(top = Spacing.s2))
         }
         FsCard {
             SectionHeader("Your data")
