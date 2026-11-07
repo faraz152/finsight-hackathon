@@ -74,7 +74,8 @@ data class Transaction(
         else -> Band.RED
     }
     /** Counts toward spending analytics (refunds, own transfers, reversals excluded). */
-    val isSpend: Boolean get() = type == TxnType.DEBIT && status != TxnStatus.REVERSED && !ownTransfer &&
+    /** Spending excludes own transfers, reversals and money moved into savings/investments. */
+    val isSpend: Boolean get() = type == TxnType.DEBIT && status != TxnStatus.REVERSED && !ownTransfer && category != Category.INVESTMENT &&
         (kind == TxnKind.EXPENSE || kind == TxnKind.FEE || kind == TxnKind.TRANSFER_OUT)
     val isIncome: Boolean get() = type == TxnType.CREDIT && kind == TxnKind.INCOME && status != TxnStatus.REVERSED
 }

@@ -17,7 +17,6 @@ object AccountResolver {
     data class Institution(val name: String, val type: AccountType)
     data class Resolution(val account: Account, val created: Boolean, val reason: String)
 
-    // TODO(after merge): replace institutionGuess with pipeline/BankProfiles.identify(sender, sourceApp, text).
     private val institutions: List<Pair<Regex, Institution>> = listOf(
         """jazz\s?cash|mobilinkcustomer""" to Institution("JazzCash", AccountType.WALLET),
         """easy\s?paisa|telenor\.phoenix""" to Institution("Easypaisa", AccountType.WALLET),
@@ -40,6 +39,15 @@ object AccountResolver {
 
     /** Small internal fallback until BankProfiles lands: sender short code → sender/app name → earliest mention in text. */
     fun institutionGuess(sender: String?, sourceApp: String?, text: String): Institution? {
+        // Primary: the 27 Pakistani bank/wallet profiles ported from the old FinSight app.
+        com.finsight.pipeline.BankProfiles.identify(sender, sourceApp ?: "", text)?.let { p ->
+            val type = when (p.type) {
+                com.finsight.pipeline.BankType.WALLET -> AccountType.WALLET
+                com.finsight.pipeline.BankType.CARD -> AccountType.CARD
+                com.finsight.pipeline.BankType.BANK -> AccountType.BANK
+            }
+            return Institution(p.name, type)
+        }
         sender?.trim()?.let { s -> shortCodes[s]?.let { return it } }
         for (field in listOf(sender, sourceApp)) {
             if (field.isNullOrBlank()) continue
