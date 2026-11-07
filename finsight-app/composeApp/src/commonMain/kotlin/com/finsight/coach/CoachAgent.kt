@@ -59,6 +59,10 @@ class CoachAgent(
 
     suspend fun ask(question: String): CoachAnswer {
         val intent = intentOf(question)
+        // Layer 1 (on-device): clearly off-topic questions never reach any model.
+        if (intent == Intent.GENERAL && TopicGuard.isOffTopic(question)) {
+            return CoachAnswer(CoachInstructions.refusal(isRomanUrdu(question)), Route.LOCAL, null, "Coach only answers money and personal-finance questions.")
+        }
         val names = repo.transactions.value.mapNotNull { it.merchant }.toSet()
         val scrubbed = Redactor.scrub(question, names)
         val route = PrivacyRouter.route(intent, cloudEnabled(), isOnline() && cloud.configured, scrubbed != null)
@@ -85,7 +89,10 @@ class CoachAgent(
         val prompt = Redactor.build(scrubbed!!, facts)
         val t0 = now()
         return try {
-            val raw = withTimeout(15_000) { cloud.complete(prompt) }
+            val rawReply = withTimeout(15_000) { cloud.complete(prompt) }
+            // Layer 2 (model): the instructions make the model answer OFF_TOPIC for anything outside finance.
+            val raw = CoachInstructions.postProcess(rawReply, ur)
+                ?: return CoachAnswer(CoachInstructions.refusal(ur), route, prompt.payloadJson(), "Coach only answers money and personal-finance questions.")
             val (verified, dropped) = NumberVerifier.verify(raw, facts)
             log.add(CloudLogEntry(t0, route.badge, cloud.modelName, prompt.payloadJson(), now() - t0, if (dropped > 0) "ok, $dropped sentence(s) removed by verifier" else "ok"))
             val text = if (intent == Intent.GENERAL) verified else local.text + "\n\n" + verified
